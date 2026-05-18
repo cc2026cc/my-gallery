@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>荣昌陶艺 · 个人作品展厅</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,6 @@
 
         h1, h2, h3, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
 
-        /* 首屏展示 */
         .hero {
             max-width: 1200px; margin: 0 auto;
             padding: 60px 20px 40px 20px; text-align: center;
@@ -40,7 +39,6 @@
         .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; }
         .hero-image img { width: 100%; max-height: 75vh; object-fit: contain; border-radius: 4px; }
 
-        /* 瀑布流/网格 */
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         .gallery-grid {
             display: grid;
@@ -48,12 +46,8 @@
             gap: 25px; opacity: 0; transition: opacity 1s ease-in;
         }
 
-        /* 手机端强制双列布局 */
         @media (max-width: 768px) {
-            .gallery-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px; /* 手机端缩小间距 */
-            }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .hero-text h1 { font-size: 2rem; }
         }
 
@@ -67,7 +61,7 @@
         .product-info { padding: 12px 5px 5px 5px; text-align: center; }
         .product-info h3 { margin: 0; font-size: 1.05rem; }
 
-        /* ================= 全新：杂志级图文折叠详情页 ================= */
+        /* ================= 详情弹窗与高定排版 ================= */
         .modal {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -75,36 +69,30 @@
             overflow-y: auto; animation: fadeIn 0.3s;
         }
 
+        /* 升级版返回按钮：移到左上角，缩小，加毛玻璃衬底 */
         .close-btn {
-            position: fixed; top: 15px; right: 25px;
-            font-size: 3rem; cursor: pointer; color: #fff;
-            z-index: 1001; background: transparent; transition: color 0.3s;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8); /* 增加阴影，在任何图上都能看清 */
+            position: fixed; top: 20px; left: 20px;
+            width: 36px; height: 36px;
+            border-radius: 50%; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; color: #fff; z-index: 1001;
+            transition: background 0.3s, transform 0.2s;
         }
-        .close-btn:hover { color: var(--accent-color); }
+        .close-btn:hover { background: rgba(0,0,0,0.8); transform: scale(1.05); }
+        .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
 
         .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
 
-        .detail-hero-wrapper {
-            position: relative; width: 100%; height: 60vh;
-            background: #000; overflow: hidden;
-        }
-        .detail-hero-wrapper img {
-            width: 100%; height: 100%; object-fit: cover;
-            opacity: 0.85; cursor: zoom-in;
-        }
+        .detail-hero-wrapper { position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; }
+        .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; cursor: zoom-in; }
 
-        /* 悬浮文字卡片（精髓所在，负边距产生交叠错落感） */
         .detail-text-card {
-            position: relative; max-width: 800px;
-            margin: -80px auto 40px auto; /* 向上提 80px，盖住首图 */
+            position: relative; max-width: 800px; margin: -80px auto 40px auto;
             background: var(--card-bg); padding: 40px;
-            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            z-index: 10;
+            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10;
         }
-        @media (max-width: 768px) {
-            .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; }
-        }
+        @media (max-width: 768px) { .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } }
 
         .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .detail-text-card p { line-height: 1.8; color: #ccc; white-space: pre-wrap; font-size: 1.05rem; }
@@ -122,16 +110,17 @@
         }
         .btn-wechat:hover { background-color: #e5b686; }
 
-        /* ================= 升级：滚轮/双指缩放灯箱 ================= */
+        /* ================= 超级灯箱 (支持拖拽、缩放) ================= */
         .lightbox {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98); z-index: 2000;
-            justify-content: center; align-items: center;
+            background: rgba(0, 0, 0, 1); z-index: 2000;
+            justify-content: center; align-items: center; overflow: hidden;
         }
         .lightbox img {
             max-width: 100%; max-height: 100vh; object-fit: contain;
-            transition: transform 0.1s ease-out; /* 使得缩放不那么生硬 */
+            user-select: none; -webkit-user-drag: none; pointer-events: none; /* 防止原生拖拽冲突 */
             transform-origin: center center;
+            will-change: transform;
         }
 
         footer { text-align: center; padding: 40px 20px; font-size: 0.85rem; color: var(--text-light); border-top: 1px solid var(--border-color); margin-top: 50px; }
@@ -147,7 +136,7 @@
             <p class="serif">泥火交融，凝结匠心。每一件作品，都是与时间的对话。</p>
         </div>
         <div class="hero-image">
-            <img src="hero.jpg" alt="荣昌陶艺" onerror="this.src='https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop'; this.onerror=null; console.log('未找到hero.jpg，使用默认图');">
+            <img src="hero.jpg" alt="荣昌陶艺" onerror="this.src='https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop'; this.onerror=null;">
         </div>
     </div>
 
@@ -158,17 +147,22 @@
 
     <!-- 动态详情弹窗的容器 -->
     <div id="product-modal" class="modal">
-        <div class="close-btn" onclick="closeModal()">×</div>
+        <!-- 精致版返回按钮 -->
+        <div class="close-btn" onclick="closeModal()">
+            <svg viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        </div>
         <div id="modal-dynamic-box"></div>
     </div>
 
-    <!-- 缩放灯箱 -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <!-- 缩放与拖拽灯箱 -->
+    <div id="lightbox" class="lightbox">
         <img id="lightbox-img" src="" alt="大图">
     </div>
 
     <footer>
-        <p>© 2024 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
+        <p>© 2026 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
         <p style="font-size: 0.75rem; margin-top: 10px; color: #555;">隐私声明：本站仅作陈列展示，不收集任何个人可识别信息。</p>
     </footer>
 
@@ -198,26 +192,19 @@
 
                         files.forEach(file => {
                             const ext = file.name.split('.').pop().toLowerCase();
-                            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-                                images.push(file.name);
-                            } else if (ext === 'txt') {
-                                infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
-                            }
+                            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { images.push(file.name); } 
+                            else if (ext === 'txt') { infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`; }
                         });
 
                         images.sort();
                         const coverImg = images.length > 0 ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}` : '';
 
-                        if (coverImg) {
-                            createCard(folderName, coverImg, images, infoUrl);
-                        }
+                        if (coverImg) { createCard(folderName, coverImg, images, infoUrl); }
                     }
                 }
                 loadingElement.style.display = 'none';
                 galleryElement.style.opacity = '1';
-            } catch (error) {
-                loadingElement.innerHTML = `⚠️ 数据读取失败。`;
-            }
+            } catch (error) { loadingElement.innerHTML = `⚠️ 数据读取失败。`; }
         }
 
         function createCard(folderName, coverUrl, allImages, infoUrl) {
@@ -226,21 +213,16 @@
             card.className = 'product-card';
             const displayName = folderName.includes('-') ? folderName.split('-')[1] : folderName;
 
-            card.innerHTML = `
-                <img src="${coverUrl}" alt="${displayName}" loading="lazy">
-                <div class="product-info"><h3 class="serif">${displayName}</h3></div>
-            `;
+            card.innerHTML = `<img src="${coverUrl}" alt="${displayName}" loading="lazy"><div class="product-info"><h3 class="serif">${displayName}</h3></div>`;
             card.onclick = () => openModal(folderName, displayName, allImages, infoUrl);
             gallery.appendChild(card);
         }
 
-        // ================= 核心：生成层次感详情页 =================
         async function openModal(folderName, displayName, images, infoUrl) {
             const modal = document.getElementById('product-modal');
             const dynamicBox = document.getElementById('modal-dynamic-box');
             
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            modal.style.display = 'block'; document.body.style.overflow = 'hidden';
             dynamicBox.innerHTML = '<div style="text-align:center; padding:100px; color:#888;">正在加载高定展厅...</div>';
 
             let textContent = '（详见图片展示）';
@@ -257,27 +239,21 @@
             }
 
             const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
-            
             let restImgsHTML = '';
             for(let i=1; i<images.length; i++){
                 let src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}`;
                 restImgsHTML += `<img src="${src}" loading="lazy" onclick="openLightbox(this.src)">`;
             }
 
-            // 图文叠加魔法结构
             dynamicBox.innerHTML = `
                 <div class="modal-content-dynamic">
-                    <div class="detail-hero-wrapper">
-                        <img src="${firstImgSrc}" onclick="openLightbox(this.src)">
-                    </div>
+                    <div class="detail-hero-wrapper"><img src="${firstImgSrc}" onclick="openLightbox(this.src)"></div>
                     <div class="detail-text-card">
                         <h2 class="serif">${displayName}</h2>
                         <p>${textContent}</p>
                         <div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>
                     </div>
-                    <div class="detail-images-list">
-                        ${restImgsHTML}
-                    </div>
+                    <div class="detail-images-list">${restImgsHTML}</div>
                 </div>
             `;
         }
@@ -287,81 +263,111 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ================= 核心：手势与滚轮缩放逻辑 =================
-        let lbScale = 1;
+        // ================= 全新：手势、拖拽、滚轮缩放逻辑 =================
         const lightbox = document.getElementById('lightbox');
         const lbImg = document.getElementById('lightbox-img');
+        
+        let lbScale = 1, currentX = 0, currentY = 0;
+        let isDragging = false, hasMoved = false;
+        let startX = 0, startY = 0, initialX = 0, initialY = 0;
+        let lbInitDist = 0, lbInitScale = 1;
+
+        function updateTransform() {
+            lbImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${lbScale})`;
+        }
 
         function openLightbox(src) {
-            lbImg.src = src;
-            lightbox.style.display = 'flex';
-            lbScale = 1;
-            lbImg.style.transform = `scale(${lbScale})`;
+            lbImg.src = src; lightbox.style.display = 'flex';
+            lbScale = 1; currentX = 0; currentY = 0;
             lbImg.style.transition = 'transform 0.1s ease-out';
+            updateTransform();
         }
 
-        // 单击关闭
-        function closeLightbox() {
-            lightbox.style.display = 'none';
-        }
+        function closeLightbox() { lightbox.style.display = 'none'; }
 
-        // 防止放大时事件冒泡导致误关
-        lbImg.addEventListener('click', (e) => {
-            // 这里我们允许点图片本身也能关闭，顺应“轻点退出”的直觉
-            // 如果不想点图片关闭，这里可以写 e.stopPropagation();
-        });
+        // 统一处理鼠标和触屏的按下事件
+        lightbox.addEventListener('mousedown', dragStart);
+        lightbox.addEventListener('touchstart', dragStart, {passive: false});
 
-        // 电脑端滚轮缩放
-        lightbox.addEventListener('wheel', (e) => {
-            e.preventDefault(); // 阻止背景乱滚
-            lbScale += e.deltaY * -0.005; // 缩放灵敏度
-            lbScale = Math.max(0.5, Math.min(lbScale, 5)); // 限制缩放倍数
-            lbImg.style.transform = `scale(${lbScale})`;
-        }, {passive: false});
-
-        // 手机端双指缩放
-        let lbInitDist = 0;
-        let lbInitScale = 1;
-
-        lightbox.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                lbImg.style.transition = 'none'; // 双指时关掉动画过渡，让手势更跟手
-                lbInitDist = Math.hypot(
-                    e.touches[0].pageX - e.touches[1].pageX,
-                    e.touches[0].pageY - e.touches[1].pageY
-                );
+        function dragStart(e) {
+            if(e.type === 'touchstart' && e.touches.length === 2) {
+                // 双指缩放初始化
+                isDragging = false;
+                lbInitDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbInitScale = lbScale;
+                lbImg.style.transition = 'none';
+                return;
             }
-        });
+            
+            isDragging = true; hasMoved = false;
+            let clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            let clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            startX = clientX; startY = clientY;
+            initialX = currentX; initialY = currentY;
+            lbImg.style.transition = 'none'; // 拖动时关闭过渡动画，保证跟手
+        }
 
-        lightbox.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 2) {
-                e.preventDefault(); // 阻止手机自带的页面缩放
-                const dist = Math.hypot(
-                    e.touches[0].pageX - e.touches[1].pageX,
-                    e.touches[0].pageY - e.touches[1].pageY
-                );
+        // 统一处理移动事件
+        lightbox.addEventListener('mousemove', dragMove);
+        lightbox.addEventListener('touchmove', dragMove, {passive: false});
+
+        function dragMove(e) {
+            e.preventDefault(); // 阻止手机浏览器原生滚动和下拉刷新
+            
+            if(e.type === 'touchmove' && e.touches.length === 2) {
+                // 双指缩放处理
+                const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbScale = Math.max(0.5, Math.min(lbInitScale * (dist / lbInitDist), 5));
-                lbImg.style.transform = `scale(${lbScale})`;
+                updateTransform();
+                return;
             }
-        }, {passive: false});
 
-        lightbox.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) {
-                lbImg.style.transition = 'transform 0.1s ease-out'; // 恢复动画过渡
-            }
-        });
+            if (!isDragging) return;
+
+            let clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            let dx = clientX - startX;
+            let dy = clientY - startY;
+
+            // 移动超过3像素才算拖动，否则算作点击
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+
+            currentX = initialX + dx; currentY = initialY + dy;
+            updateTransform();
+        }
+
+        // 统一处理结束事件
+        lightbox.addEventListener('mouseup', dragEnd);
+        lightbox.addEventListener('touchend', dragEnd);
+        lightbox.addEventListener('mouseleave', () => { isDragging = false; });
+
+        function dragEnd(e) {
+            if(e.type === 'touchend' && e.touches.length > 0) return; // 还有手指在屏幕上不触发结束
+            
+            isDragging = false;
+            lbImg.style.transition = 'transform 0.1s ease-out'; // 恢复过渡动画
+            
+            // 核心判断：如果没有移动过，就说明是一次单纯的“轻点(Click)”，关闭灯箱
+            if (!hasMoved) closeLightbox();
+        }
+
+        // 电脑滚轮缩放
+        lightbox.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            lbScale += e.deltaY * -0.003;
+            lbScale = Math.max(0.5, Math.min(lbScale, 5));
+            updateTransform();
+        }, {passive: false});
 
         // ================= 微信复制功能 =================
         function copyWechat() {
             const wechatId = "cjq678";
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(wechatId).then(() => {
-                    alert("微信号 cjq678 已复制！");
-                }).catch(err => { fallbackCopyTextToClipboard(wechatId); });
-            } else {
-                fallbackCopyTextToClipboard(wechatId);
-            }
+                navigator.clipboard.writeText(wechatId).then(() => { alert("微信号 cjq678 已复制！"); })
+                .catch(err => { fallbackCopyTextToClipboard(wechatId); });
+            } else { fallbackCopyTextToClipboard(wechatId); }
         }
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
