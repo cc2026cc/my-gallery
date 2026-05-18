@@ -12,218 +12,135 @@
     <style>
         /* ================= 视觉与交互风格 (美术馆暗黑主题) ================= */
         :root {
-            --bg-color: #121212;      /* 极深灰/接近黑的底色 */
-            --card-bg: #1e1e1e;       /* 卡片底色：稍微提亮一点的深灰，形成层次 */
-            --text-main: #eaeaea;     /* 正文文字：柔和的浅灰白，不刺眼 */
-            --text-light: #888888;    /* 辅助说明文字：深灰色 */
-            --accent-color: #d4a373;  /* 点缀色：温暖的陶土色 */
-            --border-color: #333333;  /* 分割线颜色 */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #eaeaea;
+            --text-light: #888888;
+            --accent-color: #d4a373;
+            --border-color: #333333;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: 'Noto Sans SC', sans-serif;
             scroll-behavior: smooth;
         }
 
-        h1, h2, h3, .serif {
-            font-family: 'Noto Serif SC', serif;
-            font-weight: 600;
-        }
+        h1, h2, h3, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
 
         /* 首屏展示 */
         .hero {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 20px 40px 20px;
-            text-align: center;
+            max-width: 1200px; margin: 0 auto;
+            padding: 60px 20px 40px 20px; text-align: center;
             animation: fadeIn 1s ease-out;
         }
-
-        .hero-text h1 {
-            font-size: 2.5rem;
-            letter-spacing: 0.1em;
-            margin-bottom: 15px;
-            color: var(--text-main);
-        }
-
-        .hero-text p {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto 40px auto;
-            line-height: 1.8;
-        }
-
-        .hero-image img {
-            width: 100%;
-            max-height: 75vh;
-            /* 改为 contain，确保任何设备上都能完整显示，不裁切 */
-            object-fit: contain; 
-            border-radius: 4px;
-        }
+        .hero-text h1 { font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 15px; }
+        .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; }
+        .hero-image img { width: 100%; max-height: 75vh; object-fit: contain; border-radius: 4px; }
 
         /* 瀑布流/网格 */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
-            opacity: 0;
-            transition: opacity 1s ease-in;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px; opacity: 0; transition: opacity 1s ease-in;
+        }
+
+        /* 手机端强制双列布局 */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px; /* 手机端缩小间距 */
+            }
+            .hero-text h1 { font-size: 2rem; }
         }
 
         .product-card {
-            cursor: pointer;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            position: relative;
-            background: var(--card-bg); /* 深灰色底，取代之前的白色 */
-            padding: 10px;
-            border-radius: 4px;
+            cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease;
+            background: var(--card-bg); padding: 8px; border-radius: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
+        .product-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; }
+        .product-info { padding: 12px 5px 5px 5px; text-align: center; }
+        .product-info h3 { margin: 0; font-size: 1.05rem; }
 
-        .product-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.8); 
-        }
-
-        .product-card img {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: 2px;
-        }
-
-        .product-info {
-            padding: 15px 5px 5px 5px;
-            text-align: center;
-        }
-        .product-info h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
-
-        /* 详情模态框 */
+        /* ================= 全新：杂志级图文折叠详情页 ================= */
         .modal {
-            display: none;
-            position: fixed;
+            display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); 
-            z-index: 1000;
-            overflow-y: auto;
-            animation: fadeIn 0.3s;
+            background: var(--bg-color); z-index: 1000;
+            overflow-y: auto; animation: fadeIn 0.3s;
         }
 
-        /* 修复后的关闭按钮：去除了背景圈，只保留干净的 X */
         .close-btn {
-            position: fixed;
-            top: 20px; right: 30px;
-            font-size: 3rem;
-            cursor: pointer;
-            color: var(--text-main);
-            z-index: 1001;
-            background: transparent; /* 透明底 */
-            transition: color 0.3s;
+            position: fixed; top: 15px; right: 25px;
+            font-size: 3rem; cursor: pointer; color: #fff;
+            z-index: 1001; background: transparent; transition: color 0.3s;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8); /* 增加阴影，在任何图上都能看清 */
         }
         .close-btn:hover { color: var(--accent-color); }
 
-        .modal-content {
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
+        .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
+
+        .detail-hero-wrapper {
+            position: relative; width: 100%; height: 60vh;
+            background: #000; overflow: hidden;
+        }
+        .detail-hero-wrapper img {
+            width: 100%; height: 100%; object-fit: cover;
+            opacity: 0.85; cursor: zoom-in;
         }
 
-        .modal-images { flex: 1; min-width: 300px; }
-        .modal-images img {
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            cursor: zoom-in; 
-            transition: opacity 0.3s;
-            background-color: var(--card-bg); /* 图片未加载出时的底色 */
+        /* 悬浮文字卡片（精髓所在，负边距产生交叠错落感） */
+        .detail-text-card {
+            position: relative; max-width: 800px;
+            margin: -80px auto 40px auto; /* 向上提 80px，盖住首图 */
+            background: var(--card-bg); padding: 40px;
+            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 10;
         }
-        .modal-images img:hover { opacity: 0.85; }
-
-        .modal-text {
-            flex: 1;
-            min-width: 300px;
-            position: sticky;
-            top: 60px;
-            height: fit-content;
+        @media (max-width: 768px) {
+            .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; }
         }
 
-        .modal-text h2 { 
-            font-size: 2rem; 
-            margin-top: 0; 
-            border-bottom: 1px solid var(--border-color); 
-            padding-bottom: 15px; 
-            color: var(--text-main);
+        .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .detail-text-card p { line-height: 1.8; color: #ccc; white-space: pre-wrap; font-size: 1.05rem; }
+
+        .detail-images-list {
+            max-width: 800px; margin: 0 auto; padding: 0 20px 60px 20px;
+            display: flex; flex-direction: column; gap: 30px;
         }
-        .modal-text p { 
-            line-height: 1.8; 
-            color: var(--text-light); 
-            white-space: pre-wrap; 
-            font-size: 1.05rem;
-        }
+        .detail-images-list img { width: 100%; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
 
         .btn-wechat {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 25px;
-            background-color: var(--accent-color); /* 深色模式下用陶土色做按钮 */
-            color: #121212; /* 按钮字用深色反衬 */
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 2px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
+            display: inline-block; margin-top: 20px; padding: 12px 25px;
+            background-color: var(--accent-color); color: #121212; font-weight: 600;
+            border-radius: 2px; cursor: pointer; transition: background 0.3s;
         }
-        .btn-wechat:hover { 
-            background-color: #e5b686; 
-            transform: translateY(-2px);
-        }
+        .btn-wechat:hover { background-color: #e5b686; }
 
-        /* 灯箱功能 (点击放大) */
+        /* ================= 升级：滚轮/双指缩放灯箱 ================= */
         .lightbox {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98); /* 放大时背景全黑 */
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            cursor: zoom-out;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.98); z-index: 2000;
+            justify-content: center; align-items: center;
         }
         .lightbox img {
-            max-width: 95%;
-            max-height: 95vh;
-            object-fit: contain;
+            max-width: 100%; max-height: 100vh; object-fit: contain;
+            transition: transform 0.1s ease-out; /* 使得缩放不那么生硬 */
+            transform-origin: center center;
         }
 
-        footer { 
-            text-align: center; 
-            padding: 40px 20px; 
-            font-size: 0.85rem; 
-            color: var(--text-light); 
-            border-top: 1px solid var(--border-color); 
-            margin-top: 50px; 
-        }
+        footer { text-align: center; padding: 40px 20px; font-size: 0.85rem; color: var(--text-light); border-top: 1px solid var(--border-color); margin-top: 50px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #loading { text-align: center; padding: 50px; color: var(--text-light); }
     </style>
 </head>
 <body>
 
-    <!-- 首屏 -->
     <div class="hero">
         <div class="hero-text">
             <h1>荣昌陶艺</h1>
@@ -235,41 +152,30 @@
     </div>
 
     <div class="container">
-        <div id="loading">正在从云端读取展厅数据，请稍候...<br><br><span style="font-size:12px; color: #666;">（已启用 CDN 加速通道）</span></div>
+        <div id="loading">正在从云端读取展厅数据，请稍候...</div>
         <div class="gallery-grid" id="gallery"></div>
     </div>
 
-    <!-- 详情弹窗 -->
+    <!-- 动态详情弹窗的容器 -->
     <div id="product-modal" class="modal">
         <div class="close-btn" onclick="closeModal()">×</div>
-        <div class="modal-content">
-            <div class="modal-images" id="modal-images"></div>
-            <div class="modal-text">
-                <h2 id="modal-title">加载中...</h2>
-                <p id="modal-desc"></p>
-                <div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>
-            </div>
-        </div>
+        <div id="modal-dynamic-box"></div>
     </div>
 
-    <!-- 单图放大灯箱 -->
+    <!-- 缩放灯箱 -->
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <img id="lightbox-img" src="" alt="大图">
     </div>
 
     <footer>
         <p>© 2024 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
-        <p style="font-size: 0.75rem; margin-top: 10px; color: #555;">隐私声明：本站仅作陈列展示。为优化浏览体验，本站可能使用统计工具记录页面访问量与滚动深度，但不收集任何可识别个人身份的信息。</p>
+        <p style="font-size: 0.75rem; margin-top: 10px; color: #555;">隐私声明：本站仅作陈列展示，不收集任何个人可识别信息。</p>
     </footer>
 
     <script>
         const GITHUB_USERNAME = "cc2026cc"; 
         const REPO_NAME = "my-gallery"; 
-
-        // 读取目录仍使用 GitHub API
         const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
-        
-        // 【核心提速】：不再使用龟速的 raw.githubusercontent.com，改为使用 fastly CDN 边缘节点加速！
         const rawBase = `https://fastly.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
 
         async function initGallery() {
@@ -295,7 +201,6 @@
                             if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
                                 images.push(file.name);
                             } else if (ext === 'txt') {
-                                // txt文件也用加速链接
                                 infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
                             }
                         });
@@ -310,9 +215,8 @@
                 }
                 loadingElement.style.display = 'none';
                 galleryElement.style.opacity = '1';
-
             } catch (error) {
-                loadingElement.innerHTML = `⚠️ 数据读取失败，请检查文件夹命名是否含有无法解析的特殊字符。`;
+                loadingElement.innerHTML = `⚠️ 数据读取失败。`;
             }
         }
 
@@ -320,107 +224,151 @@
             const gallery = document.getElementById('gallery');
             const card = document.createElement('div');
             card.className = 'product-card';
-            
             const displayName = folderName.includes('-') ? folderName.split('-')[1] : folderName;
 
             card.innerHTML = `
                 <img src="${coverUrl}" alt="${displayName}" loading="lazy">
-                <div class="product-info">
-                    <h3 class="serif">${displayName}</h3>
-                </div>
+                <div class="product-info"><h3 class="serif">${displayName}</h3></div>
             `;
             card.onclick = () => openModal(folderName, displayName, allImages, infoUrl);
             gallery.appendChild(card);
         }
 
+        // ================= 核心：生成层次感详情页 =================
         async function openModal(folderName, displayName, images, infoUrl) {
             const modal = document.getElementById('product-modal');
-            const imgContainer = document.getElementById('modal-images');
-            const titleEl = document.getElementById('modal-title');
-            const descEl = document.getElementById('modal-desc');
-
-            titleEl.innerText = displayName;
-            imgContainer.innerHTML = '';
-            descEl.innerText = '加载描述中...';
+            const dynamicBox = document.getElementById('modal-dynamic-box');
+            
             modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            dynamicBox.innerHTML = '<div style="text-align:center; padding:100px; color:#888;">正在加载高定展厅...</div>';
 
-            document.body.style.overflow = 'hidden'; // 禁止底页滚动
-
-            images.forEach(imgName => {
-                const img = document.createElement('img');
-                img.src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(imgName)}`;
-                img.loading = "lazy"; // 懒加载
-                img.onclick = function() { openLightbox(this.src); };
-                imgContainer.appendChild(img);
-            });
-
+            let textContent = '（详见图片展示）';
             if (infoUrl) {
                 try {
                     const txtRes = await fetch(infoUrl);
                     const textBuffer = await txtRes.arrayBuffer();
                     const decoder = new TextDecoder('utf-8');
                     let text = decoder.decode(textBuffer);
-                    
                     let lines = text.split('\n');
                     if(lines.length > 1 && lines[0].length < 20) lines.shift(); 
-                    descEl.innerText = lines.join('\n');
-                } catch (e) {
-                    descEl.innerText = '暂无详细描述。';
-                }
-            } else {
-                descEl.innerText = '暂无详细描述。';
+                    textContent = lines.join('\n');
+                } catch (e) {}
             }
+
+            const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
+            
+            let restImgsHTML = '';
+            for(let i=1; i<images.length; i++){
+                let src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}`;
+                restImgsHTML += `<img src="${src}" loading="lazy" onclick="openLightbox(this.src)">`;
+            }
+
+            // 图文叠加魔法结构
+            dynamicBox.innerHTML = `
+                <div class="modal-content-dynamic">
+                    <div class="detail-hero-wrapper">
+                        <img src="${firstImgSrc}" onclick="openLightbox(this.src)">
+                    </div>
+                    <div class="detail-text-card">
+                        <h2 class="serif">${displayName}</h2>
+                        <p>${textContent}</p>
+                        <div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>
+                    </div>
+                    <div class="detail-images-list">
+                        ${restImgsHTML}
+                    </div>
+                </div>
+            `;
         }
 
         function closeModal() {
             document.getElementById('product-modal').style.display = 'none';
-            document.body.style.overflow = 'auto'; // 恢复滚动
+            document.body.style.overflow = 'auto'; 
         }
 
-        function openLightbox(imgSrc) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
-            lightboxImg.src = imgSrc;
+        // ================= 核心：手势与滚轮缩放逻辑 =================
+        let lbScale = 1;
+        const lightbox = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+
+        function openLightbox(src) {
+            lbImg.src = src;
             lightbox.style.display = 'flex';
+            lbScale = 1;
+            lbImg.style.transform = `scale(${lbScale})`;
+            lbImg.style.transition = 'transform 0.1s ease-out';
         }
 
+        // 单击关闭
         function closeLightbox() {
-            document.getElementById('lightbox').style.display = 'none';
+            lightbox.style.display = 'none';
         }
 
+        // 防止放大时事件冒泡导致误关
+        lbImg.addEventListener('click', (e) => {
+            // 这里我们允许点图片本身也能关闭，顺应“轻点退出”的直觉
+            // 如果不想点图片关闭，这里可以写 e.stopPropagation();
+        });
+
+        // 电脑端滚轮缩放
+        lightbox.addEventListener('wheel', (e) => {
+            e.preventDefault(); // 阻止背景乱滚
+            lbScale += e.deltaY * -0.005; // 缩放灵敏度
+            lbScale = Math.max(0.5, Math.min(lbScale, 5)); // 限制缩放倍数
+            lbImg.style.transform = `scale(${lbScale})`;
+        }, {passive: false});
+
+        // 手机端双指缩放
+        let lbInitDist = 0;
+        let lbInitScale = 1;
+
+        lightbox.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                lbImg.style.transition = 'none'; // 双指时关掉动画过渡，让手势更跟手
+                lbInitDist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                lbInitScale = lbScale;
+            }
+        });
+
+        lightbox.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault(); // 阻止手机自带的页面缩放
+                const dist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                lbScale = Math.max(0.5, Math.min(lbInitScale * (dist / lbInitDist), 5));
+                lbImg.style.transform = `scale(${lbScale})`;
+            }
+        }, {passive: false});
+
+        lightbox.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                lbImg.style.transition = 'transform 0.1s ease-out'; // 恢复动画过渡
+            }
+        });
+
+        // ================= 微信复制功能 =================
         function copyWechat() {
             const wechatId = "cjq678";
-            
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(wechatId).then(() => {
-                    alert("微信号 cjq678 已复制！请前往微信添加。");
-                }).catch(err => {
-                    fallbackCopyTextToClipboard(wechatId);
-                });
+                    alert("微信号 cjq678 已复制！");
+                }).catch(err => { fallbackCopyTextToClipboard(wechatId); });
             } else {
                 fallbackCopyTextToClipboard(wechatId);
             }
         }
-
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                var successful = document.execCommand('copy');
-                if (successful) {
-                    alert("微信号 cjq678 已复制！请前往微信添加。");
-                } else {
-                    alert("复制失败，请手动记录微信号：cjq678");
-                }
-            } catch (err) {
-                alert("当前环境不支持一键复制，请手动输入：cjq678");
-            }
+            textArea.value = text; textArea.style.position = "fixed";
+            document.body.appendChild(textArea); textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); alert("微信号 cjq678 已复制！"); } 
+            catch (err) { alert("请手动输入：cjq678"); }
             document.body.removeChild(textArea);
         }
 
