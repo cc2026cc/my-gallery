@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>荣昌陶艺 · 个人作品展厅</title>
     
+    <!-- 针对苹果 Safari 的提速优化：提前建立连接 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://api.github.com" crossorigin>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
@@ -37,7 +41,7 @@
         }
         .hero-text h1 { font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 15px; }
         .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; }
-        .hero-image img { width: 100%; max-height: 75vh; object-fit: contain; border-radius: 4px; }
+        .hero-image img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 4px; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         .gallery-grid {
@@ -57,7 +61,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
-        .product-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; }
+        .product-card img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; display: block; }
         .product-info { padding: 12px 5px 5px 5px; text-align: center; }
         .product-info h3 { margin: 0; font-size: 1.05rem; }
 
@@ -67,9 +71,9 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 1000;
             overflow-y: auto; animation: fadeIn 0.3s;
+            -webkit-overflow-scrolling: touch; /* Safari 滑动优化 */
         }
 
-        /* 升级版返回按钮：移到左上角，缩小，加毛玻璃衬底 */
         .close-btn {
             position: fixed; top: 20px; left: 20px;
             width: 36px; height: 36px;
@@ -97,11 +101,17 @@
         .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .detail-text-card p { line-height: 1.8; color: #ccc; white-space: pre-wrap; font-size: 1.05rem; }
 
+        /* 专门修复 Safari 图片变形：改用 display: block 避开 Flexbox 拉伸缺陷 */
         .detail-images-list {
             max-width: 800px; margin: 0 auto; padding: 0 20px 60px 20px;
-            display: flex; flex-direction: column; gap: 30px;
+            display: block;
         }
-        .detail-images-list img { width: 100%; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .detail-images-list img { 
+            width: 100%; height: auto; /* 高度自适应，绝不变形 */
+            border-radius: 4px; cursor: zoom-in; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            margin-bottom: 30px; display: block;
+        }
 
         .btn-wechat {
             display: inline-block; margin-top: 20px; padding: 12px 25px;
@@ -117,8 +127,9 @@
             justify-content: center; align-items: center; overflow: hidden;
         }
         .lightbox img {
+            width: auto; height: auto; /* Safari 限制 */
             max-width: 100%; max-height: 100vh; object-fit: contain;
-            user-select: none; -webkit-user-drag: none; pointer-events: none; /* 防止原生拖拽冲突 */
+            user-select: none; -webkit-user-drag: none; pointer-events: none; 
             transform-origin: center center;
             will-change: transform;
         }
@@ -136,7 +147,7 @@
             <p class="serif">泥火交融，凝结匠心。每一件作品，都是与时间的对话。</p>
         </div>
         <div class="hero-image">
-            <img src="hero.jpg" alt="荣昌陶艺" onerror="this.src='https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop'; this.onerror=null;">
+            <img src="hero.jpg" alt="荣昌陶艺" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop'; this.onerror=null;">
         </div>
     </div>
 
@@ -162,7 +173,7 @@
     </div>
 
     <footer>
-        <p>© 2026 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
+        <p>© 2024 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
         <p style="font-size: 0.75rem; margin-top: 10px; color: #555;">隐私声明：本站仅作陈列展示，不收集任何个人可识别信息。</p>
     </footer>
 
@@ -170,7 +181,8 @@
         const GITHUB_USERNAME = "cc2026cc"; 
         const REPO_NAME = "my-gallery"; 
         const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
-        const rawBase = `https://fastly.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
+        // 改用智能路由的官方 CDN，苹果手机兼容性更好
+        const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
 
         async function initGallery() {
             const galleryElement = document.getElementById('gallery');
@@ -213,7 +225,7 @@
             card.className = 'product-card';
             const displayName = folderName.includes('-') ? folderName.split('-')[1] : folderName;
 
-            card.innerHTML = `<img src="${coverUrl}" alt="${displayName}" loading="lazy"><div class="product-info"><h3 class="serif">${displayName}</h3></div>`;
+            card.innerHTML = `<img src="${coverUrl}" alt="${displayName}" loading="lazy" decoding="async"><div class="product-info"><h3 class="serif">${displayName}</h3></div>`;
             card.onclick = () => openModal(folderName, displayName, allImages, infoUrl);
             gallery.appendChild(card);
         }
@@ -242,12 +254,13 @@
             let restImgsHTML = '';
             for(let i=1; i<images.length; i++){
                 let src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}`;
-                restImgsHTML += `<img src="${src}" loading="lazy" onclick="openLightbox(this.src)">`;
+                // 加入 decoding="async" 防止大图卡顿 Safari
+                restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
             }
 
             dynamicBox.innerHTML = `
                 <div class="modal-content-dynamic">
-                    <div class="detail-hero-wrapper"><img src="${firstImgSrc}" onclick="openLightbox(this.src)"></div>
+                    <div class="detail-hero-wrapper"><img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)"></div>
                     <div class="detail-text-card">
                         <h2 class="serif">${displayName}</h2>
                         <p>${textContent}</p>
@@ -263,12 +276,12 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ================= 全新：手势、拖拽、滚轮缩放逻辑 =================
+        // ================= 全新：彻底修复双指松开闪退的缩放逻辑 =================
         const lightbox = document.getElementById('lightbox');
         const lbImg = document.getElementById('lightbox-img');
         
         let lbScale = 1, currentX = 0, currentY = 0;
-        let isDragging = false, hasMoved = false;
+        let isDragging = false, hasMoved = false, isZooming = false;
         let startX = 0, startY = 0, initialX = 0, initialY = 0;
         let lbInitDist = 0, lbInitScale = 1;
 
@@ -285,38 +298,36 @@
 
         function closeLightbox() { lightbox.style.display = 'none'; }
 
-        // 统一处理鼠标和触屏的按下事件
         lightbox.addEventListener('mousedown', dragStart);
         lightbox.addEventListener('touchstart', dragStart, {passive: false});
 
         function dragStart(e) {
             if(e.type === 'touchstart' && e.touches.length === 2) {
-                // 双指缩放初始化
-                isDragging = false;
+                isZooming = true;
+                hasMoved = true; // 强制标记为已移动，防止松手触发点击关闭
                 lbInitDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbInitScale = lbScale;
                 lbImg.style.transition = 'none';
                 return;
             }
             
-            isDragging = true; hasMoved = false;
+            isDragging = true; hasMoved = false; isZooming = false;
             let clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
             let clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
             
             startX = clientX; startY = clientY;
             initialX = currentX; initialY = currentY;
-            lbImg.style.transition = 'none'; // 拖动时关闭过渡动画，保证跟手
+            lbImg.style.transition = 'none'; 
         }
 
-        // 统一处理移动事件
         lightbox.addEventListener('mousemove', dragMove);
         lightbox.addEventListener('touchmove', dragMove, {passive: false});
 
         function dragMove(e) {
-            e.preventDefault(); // 阻止手机浏览器原生滚动和下拉刷新
+            e.preventDefault(); 
             
             if(e.type === 'touchmove' && e.touches.length === 2) {
-                // 双指缩放处理
+                hasMoved = true; 
                 const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbScale = Math.max(0.5, Math.min(lbInitScale * (dist / lbInitDist), 5));
                 updateTransform();
@@ -331,29 +342,30 @@
             let dx = clientX - startX;
             let dy = clientY - startY;
 
-            // 移动超过3像素才算拖动，否则算作点击
             if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
 
             currentX = initialX + dx; currentY = initialY + dy;
             updateTransform();
         }
 
-        // 统一处理结束事件
         lightbox.addEventListener('mouseup', dragEnd);
         lightbox.addEventListener('touchend', dragEnd);
         lightbox.addEventListener('mouseleave', () => { isDragging = false; });
 
         function dragEnd(e) {
-            if(e.type === 'touchend' && e.touches.length > 0) return; // 还有手指在屏幕上不触发结束
+            if(e.type === 'touchend' && e.touches.length > 0) return; 
             
             isDragging = false;
-            lbImg.style.transition = 'transform 0.1s ease-out'; // 恢复过渡动画
+            lbImg.style.transition = 'transform 0.1s ease-out'; 
             
-            // 核心判断：如果没有移动过，就说明是一次单纯的“轻点(Click)”，关闭灯箱
-            if (!hasMoved) closeLightbox();
+            // 如果既没有拖拽过，也没有双指缩放过，才执行关闭（纯粹的轻点）
+            if (!hasMoved && !isZooming) {
+                closeLightbox();
+            }
+            
+            isZooming = false; // 动作结束重置状态
         }
 
-        // 电脑滚轮缩放
         lightbox.addEventListener('wheel', (e) => {
             e.preventDefault();
             lbScale += e.deltaY * -0.003;
@@ -361,7 +373,6 @@
             updateTransform();
         }, {passive: false});
 
-        // ================= 微信复制功能 =================
         function copyWechat() {
             const wechatId = "cjq678";
             if (navigator.clipboard && window.isSecureContext) {
