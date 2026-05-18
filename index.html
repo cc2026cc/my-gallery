@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>荣昌陶艺 · 个人作品展厅</title>
     
-    <!-- 针对苹果 Safari 的提速优化：提前建立连接 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://api.github.com" crossorigin>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
 
     <style>
-        /* ================= 视觉与交互风格 (美术馆暗黑主题) ================= */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -24,115 +21,50 @@
             --border-color: #333333;
         }
 
-        body, html {
-            margin: 0; padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Noto Sans SC', sans-serif;
-            scroll-behavior: smooth;
-        }
-
+        body, html { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); font-family: 'Noto Sans SC', sans-serif; scroll-behavior: smooth; }
         h1, h2, h3, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
 
-        .hero {
-            max-width: 1200px; margin: 0 auto;
-            padding: 60px 20px 40px 20px; text-align: center;
-            animation: fadeIn 1s ease-out;
-        }
+        .hero { max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px 20px; text-align: center; animation: fadeIn 1s ease-out; }
         .hero-text h1 { font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 15px; }
         .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; }
         .hero-image img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 4px; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px; opacity: 0; transition: opacity 1s ease-in;
-        }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; opacity: 0; transition: opacity 1s ease-in; }
 
         @media (max-width: 768px) {
             .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             .hero-text h1 { font-size: 2rem; }
         }
 
-        .product-card {
-            cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease;
-            background: var(--card-bg); padding: 8px; border-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
+        .product-card { cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; background: var(--card-bg); padding: 8px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
         .product-card img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; display: block; }
         .product-info { padding: 12px 5px 5px 5px; text-align: center; }
         .product-info h3 { margin: 0; font-size: 1.05rem; }
 
-        /* ================= 详情弹窗与高定排版 ================= */
-        .modal {
-            display: none; position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 1000;
-            overflow-y: auto; animation: fadeIn 0.3s;
-            -webkit-overflow-scrolling: touch; /* Safari 滑动优化 */
-        }
-
-        .close-btn {
-            position: fixed; top: 20px; left: 20px;
-            width: 36px; height: 36px;
-            border-radius: 50%; background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; color: #fff; z-index: 1001;
-            transition: background 0.3s, transform 0.2s;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; overflow-y: auto; animation: fadeIn 0.3s; -webkit-overflow-scrolling: touch; }
+        .close-btn { position: fixed; top: 20px; left: 20px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; cursor: pointer; color: #fff; z-index: 1001; transition: background 0.3s, transform 0.2s; }
         .close-btn:hover { background: rgba(0,0,0,0.8); transform: scale(1.05); }
         .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
 
         .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
-
         .detail-hero-wrapper { position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; }
         .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; cursor: zoom-in; }
 
-        .detail-text-card {
-            position: relative; max-width: 800px; margin: -80px auto 40px auto;
-            background: var(--card-bg); padding: 40px;
-            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10;
-        }
+        .detail-text-card { position: relative; max-width: 800px; margin: -80px auto 40px auto; background: var(--card-bg); padding: 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10; }
         @media (max-width: 768px) { .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } }
-
         .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .detail-text-card p { line-height: 1.8; color: #ccc; white-space: pre-wrap; font-size: 1.05rem; }
 
-        /* 专门修复 Safari 图片变形：改用 display: block 避开 Flexbox 拉伸缺陷 */
-        .detail-images-list {
-            max-width: 800px; margin: 0 auto; padding: 0 20px 60px 20px;
-            display: block;
-        }
-        .detail-images-list img { 
-            width: 100%; height: auto; /* 高度自适应，绝不变形 */
-            border-radius: 4px; cursor: zoom-in; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            margin-bottom: 30px; display: block;
-        }
+        .detail-images-list { max-width: 800px; margin: 0 auto; padding: 0 20px 60px 20px; display: block; }
+        .detail-images-list img { width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; display: block; }
 
-        .btn-wechat {
-            display: inline-block; margin-top: 20px; padding: 12px 25px;
-            background-color: var(--accent-color); color: #121212; font-weight: 600;
-            border-radius: 2px; cursor: pointer; transition: background 0.3s;
-        }
+        .btn-wechat { display: inline-block; margin-top: 20px; padding: 12px 25px; background-color: var(--accent-color); color: #121212; font-weight: 600; border-radius: 2px; cursor: pointer; transition: background 0.3s; }
         .btn-wechat:hover { background-color: #e5b686; }
 
-        /* ================= 超级灯箱 (支持拖拽、缩放) ================= */
-        .lightbox {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 1); z-index: 2000;
-            justify-content: center; align-items: center; overflow: hidden;
-        }
-        .lightbox img {
-            width: auto; height: auto; /* Safari 限制 */
-            max-width: 100%; max-height: 100vh; object-fit: contain;
-            user-select: none; -webkit-user-drag: none; pointer-events: none; 
-            transform-origin: center center;
-            will-change: transform;
-        }
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 1); z-index: 2000; justify-content: center; align-items: center; overflow: hidden; }
+        .lightbox img { width: auto; height: auto; max-width: 100%; max-height: 100vh; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; transform-origin: center center; will-change: transform; }
 
         footer { text-align: center; padding: 40px 20px; font-size: 0.85rem; color: var(--text-light); border-top: 1px solid var(--border-color); margin-top: 50px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -156,18 +88,13 @@
         <div class="gallery-grid" id="gallery"></div>
     </div>
 
-    <!-- 动态详情弹窗的容器 -->
     <div id="product-modal" class="modal">
-        <!-- 精致版返回按钮 -->
         <div class="close-btn" onclick="closeModal()">
-            <svg viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </div>
         <div id="modal-dynamic-box"></div>
     </div>
 
-    <!-- 缩放与拖拽灯箱 -->
     <div id="lightbox" class="lightbox">
         <img id="lightbox-img" src="" alt="大图">
     </div>
@@ -181,7 +108,6 @@
         const GITHUB_USERNAME = "cc2026cc"; 
         const REPO_NAME = "my-gallery"; 
         const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
-        // 改用智能路由的官方 CDN，苹果手机兼容性更好
         const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
 
         async function initGallery() {
@@ -254,7 +180,6 @@
             let restImgsHTML = '';
             for(let i=1; i<images.length; i++){
                 let src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}`;
-                // 加入 decoding="async" 防止大图卡顿 Safari
                 restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
             }
 
@@ -276,7 +201,7 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ================= 全新：彻底修复双指松开闪退的缩放逻辑 =================
+        // ================= 修复幽灵点击的完美缩放逻辑 =================
         const lightbox = document.getElementById('lightbox');
         const lbImg = document.getElementById('lightbox-img');
         
@@ -292,6 +217,7 @@
         function openLightbox(src) {
             lbImg.src = src; lightbox.style.display = 'flex';
             lbScale = 1; currentX = 0; currentY = 0;
+            hasMoved = false; isZooming = false;
             lbImg.style.transition = 'transform 0.1s ease-out';
             updateTransform();
         }
@@ -304,7 +230,7 @@
         function dragStart(e) {
             if(e.type === 'touchstart' && e.touches.length === 2) {
                 isZooming = true;
-                hasMoved = true; // 强制标记为已移动，防止松手触发点击关闭
+                hasMoved = true; 
                 lbInitDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbInitScale = lbScale;
                 lbImg.style.transition = 'none';
@@ -354,17 +280,20 @@
 
         function dragEnd(e) {
             if(e.type === 'touchend' && e.touches.length > 0) return; 
-            
             isDragging = false;
             lbImg.style.transition = 'transform 0.1s ease-out'; 
-            
-            // 如果既没有拖拽过，也没有双指缩放过，才执行关闭（纯粹的轻点）
-            if (!hasMoved && !isZooming) {
-                closeLightbox();
-            }
-            
-            isZooming = false; // 动作结束重置状态
+            // 核心修复：这里绝对不触发关闭动作，完全交给下方的 Click 事件来吸收幽灵点击！
         }
+
+        // 统一由原生的 Click 事件来判断是否关闭
+        lightbox.addEventListener('click', (e) => {
+            if (!hasMoved && !isZooming) {
+                closeLightbox(); // 只有纯粹的点按才关闭
+            }
+            // 重置状态，准备下一次动作
+            hasMoved = false;
+            isZooming = false;
+        });
 
         lightbox.addEventListener('wheel', (e) => {
             e.preventDefault();
