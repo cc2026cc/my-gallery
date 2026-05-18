@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>荣昌陶艺 · 个人作品展厅</title>
+    
+    <!-- 引入 Google Fonts: 思源宋体(标题) 和 Noto Sans(正文) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= 视觉与交互风格 ================= */
+        :root {
+            --bg-color: #fcfbf9; /* 象牙白/宣纸色底色 */
+            --text-dark: #2c2c2c; /* 深墨灰 */
+            --text-light: #7a7a7a;
+            --accent-color: #8b5a2b; /* 陶土色点缀 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: 'Noto Sans SC', sans-serif;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+        }
+
+        /* 首屏展示 (Hero Section) */
+        .hero {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(252, 251, 249, 0.5), rgba(252, 251, 249, 1)), url('https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop') center/cover;
+            animation: fadeIn 1.5s ease-out;
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        /* 产品列表瀑布流/网格 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 4px;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.03);
+        }
+
+        .product-info {
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        .product-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+        }
+
+        /* 模态框 (产品详情页) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(252, 251, 249, 0.98);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 30px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            z-index: 1001;
+        }
+
+        .modal-images {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .modal-images img {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .modal-text {
+            flex: 1;
+            min-width: 300px;
+            position: sticky;
+            top: 50px;
+            height: fit-content;
+        }
+
+        .modal-text h2 {
+            font-size: 2rem;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .modal-text p {
+            line-height: 1.8;
+            color: var(--text-light);
+            white-space: pre-wrap; /* 保持 txt 的换行 */
+        }
+
+        .btn-wechat {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background-color: var(--text-dark);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-wechat:hover { background-color: var(--accent-color); }
+
+        /* 底部合规与隐私 */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.85rem;
+            color: #999;
+            border-top: 1px solid #eee;
+            margin-top: 50px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #loading { text-align: center; padding: 50px; color: var(--text-light); }
+    </style>
+</head>
+<body>
+
+    <!-- 首屏区 -->
+    <div class="hero">
+        <h1>荣昌陶艺</h1>
+        <p class="serif">泥火交融，凝结匠心。每一件作品，都是与时间的对话。<br>欢迎来到我的数字陈列空间。</p>
+    </div>
+
+    <!-- 展厅区 -->
+    <div class="container">
+        <div id="loading">正在从云端读取展厅数据，请稍候...</div>
+        <div class="gallery-grid" id="gallery">
+            <!-- JavaScript 会自动把产品卡片插在这里 -->
+        </div>
+    </div>
+
+    <!-- 产品详情弹窗 -->
+    <div id="product-modal" class="modal">
+        <div class="close-btn" onclick="closeModal()">×</div>
+        <div class="modal-content">
+            <div class="modal-images" id="modal-images">
+                <!-- 高清大图 -->
+            </div>
+            <div class="modal-text">
+                <h2 id="modal-title">产品标题</h2>
+                <p id="modal-desc">产品描述加载中...</p>
+                <div class="btn-wechat" onclick="copyWechat()">获取结缘方式 (复制微信号)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部版权与隐私 -->
+    <footer>
+        <p>© 2024 YourName All Rights Reserved. 荣昌陶艺个人线上展厅</p>
+        <p style="font-size: 0.75rem; margin-top: 10px;">隐私声明：本站仅作陈列展示。为优化浏览体验，本站可能使用统计工具记录页面访问量与滚动深度，但不收集任何可识别个人身份的信息。</p>
+    </footer>
+
+    <!-- ================= 核心逻辑：自动读取文件夹 ================= -->
+    <script>
+        // 【注意！】请务必修改这里的用户名和仓库名！
+        const GITHUB_USERNAME = "cc2026cc"; // 例如: ppoo123
+        const REPO_NAME = "my-gallery"; 
+
+        const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
+        const rawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/products`;
+
+        async function initGallery() {
+            const galleryElement = document.getElementById('gallery');
+            const loadingElement = document.getElementById('loading');
+
+            try {
+                // 1. 获取 /products/ 目录下的所有文件夹
+                const response = await fetch(apiBase);
+                if (!response.ok) throw new Error("无法读取产品目录，请检查用户名或仓库名是否正确，且仓库必须是Public。");
+                const folders = await response.json();
+
+                // 2. 遍历每个文件夹
+                for (let folder of folders) {
+                    if (folder.type === 'dir') {
+                        const folderName = folder.name;
+                        // 获取文件夹内的文件列表
+                        const folderRes = await fetch(`${apiBase}/${encodeURIComponent(folderName)}`);
+                        const files = await folderRes.json();
+
+                        let images = [];
+                        let infoUrl = '';
+
+                        // 分类图片和 txt 文件
+                        files.forEach(file => {
+                            const ext = file.name.split('.').pop().toLowerCase();
+                            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                                images.push(file.name);
+                            } else if (ext === 'txt') {
+                                infoUrl = file.download_url; // 获取 txt 真实下载地址
+                            }
+                        });
+
+                        // 图片按名字排序，最小的作为封面
+                        images.sort();
+                        const coverImg = images.length > 0 ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}` : '';
+
+                        // 3. 生成卡片放入页面
+                        if (coverImg) {
+                            createCard(folderName, coverImg, images, infoUrl);
+                        }
+                    }
+                }
+                loadingElement.style.display = 'none';
+                galleryElement.style.opacity = '1';
+
+            } catch (error) {
+                loadingElement.innerHTML = `⚠️ 数据读取失败: ${error.message} <br>（温馨提示：由于中文名测试，如果一直失败，请尝试将文件夹名改为拼音）`;
+            }
+        }
+
+        // 创建产品卡片
+        function createCard(folderName, coverUrl, allImages, infoUrl) {
+            const gallery = document.getElementById('gallery');
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            
+            // 提取名称 (去掉序号，比如把 "01-坛香壶" 变成 "坛香壶")
+            const displayName = folderName.includes('-') ? folderName.split('-')[1] : folderName;
+
+            card.innerHTML = `
+                <img src="${coverUrl}" alt="${displayName}" loading="lazy">
+                <div class="product-info">
+                    <h3 class="serif">${displayName}</h3>
+                </div>
+            `;
+
+            // 点击事件：打开详情
+            card.onclick = () => openModal(folderName, displayName, allImages, infoUrl);
+            gallery.appendChild(card);
+        }
+
+        // 打开详情模态框
+        async function openModal(folderName, displayName, images, infoUrl) {
+            const modal = document.getElementById('product-modal');
+            const imgContainer = document.getElementById('modal-images');
+            const titleEl = document.getElementById('modal-title');
+            const descEl = document.getElementById('modal-desc');
+
+            titleEl.innerText = displayName;
+            imgContainer.innerHTML = '加载图片中...';
+            descEl.innerText = '加载描述中...';
+            modal.style.display = 'block';
+
+            // 1. 加载所有图片
+            imgContainer.innerHTML = '';
+            images.forEach(imgName => {
+                const img = document.createElement('img');
+                img.src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(imgName)}`;
+                imgContainer.appendChild(img);
+            });
+
+            // 2. 加载 txt 内容
+            if (infoUrl) {
+                try {
+                    const txtRes = await fetch(infoUrl);
+                    // 解决可能出现的中文乱码，统一按 UTF-8 读取
+                    const textBuffer = await txtRes.arrayBuffer();
+                    const decoder = new TextDecoder('utf-8');
+                    let text = decoder.decode(textBuffer);
+                    
+                    // 如果第一行是标题，去掉第一行，保留正文
+                    let lines = text.split('\n');
+                    if(lines.length > 1 && lines[0].length < 20) {
+                        lines.shift(); 
+                    }
+                    descEl.innerText = lines.join('\n');
+                } catch (e) {
+                    descEl.innerText = '描述读取失败。';
+                }
+            } else {
+                descEl.innerText = '暂无详细描述。';
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('product-modal').style.display = 'none';
+        }
+
+        // 复制微信号
+        function copyWechat() {
+            const wechatId = "YOUR_WECHAT_ID"; // 可替换为您的真实微信号
+            navigator.clipboard.writeText(wechatId).then(() => {
+                alert("微信号已复制，请前往微信添加好友！\n（若未成功，请手动添加： " + wechatId + "）");
+            });
+        }
+
+        // 启动！
+        initGallery();
+
+        /* 
+        =========================================================
+        统计代码预留区 (GA4 / Clarity)
+        等网站跑通后，直接将统计平台的 <script> 标签粘贴在这个注释下方即可
+        =========================================================
+        */
+    </script>
+</body>
+</html>
