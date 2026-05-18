@@ -64,7 +64,14 @@
         .btn-wechat:hover { background-color: #e5b686; }
 
         .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 1); z-index: 2000; justify-content: center; align-items: center; overflow: hidden; }
-        .lightbox img { width: auto; height: auto; max-width: 100%; max-height: 100vh; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; transform-origin: center center; will-change: transform; }
+        
+        /* 核心改进：为图片加上物理动画缓冲属性，实现松手回弹效果 */
+        .lightbox img { 
+            width: auto; height: auto; max-width: 100%; max-height: 100vh; object-fit: contain; 
+            user-select: none; -webkit-user-drag: none; pointer-events: none; 
+            transform-origin: center center; will-change: transform; 
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 平滑阻尼感 */
+        }
 
         footer { text-align: center; padding: 40px 20px; font-size: 0.85rem; color: var(--text-light); border-top: 1px solid var(--border-color); margin-top: 50px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -201,7 +208,7 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ================= 修复幽灵点击的完美缩放逻辑 =================
+        // ================= 完美防跳帧 + 回弹居中 缩放引擎 =================
         const lightbox = document.getElementById('lightbox');
         const lbImg = document.getElementById('lightbox-img');
         
@@ -209,6 +216,9 @@
         let isDragging = false, hasMoved = false, isZooming = false;
         let startX = 0, startY = 0, initialX = 0, initialY = 0;
         let lbInitDist = 0, lbInitScale = 1;
+        
+        // 防抖锁：双手拿开的缓冲期，禁止触发拖拽
+        let interactionLock = false; 
 
         function updateTransform() {
             lbImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${lbScale})`;
@@ -217,9 +227,15 @@
         function openLightbox(src) {
             lbImg.src = src; lightbox.style.display = 'flex';
             lbScale = 1; currentX = 0; currentY = 0;
-            hasMoved = false; isZooming = false;
-            lbImg.style.transition = 'transform 0.1s ease-out';
+            hasMoved = false; isZooming = false; interactionLock = false;
+            // 打开时不加过度动画，瞬间呈现
+            lbImg.style.transition = 'none'; 
             updateTransform();
+            
+            // 下一帧再加上平滑过渡属性
+            requestAnimationFrame(() => {
+                lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            });
         }
 
         function closeLightbox() { lightbox.style.display = 'none'; }
@@ -228,12 +244,14 @@
         lightbox.addEventListener('touchstart', dragStart, {passive: false});
 
         function dragStart(e) {
-            if(e.type === 'touchstart' && e.touches.length === 2) {
+            if (interactionLock) return; // 如果在防抖冷却期，忽略新的按下
+
+            if(e.type === 'touchstart' && e.touches.length >= 2) {
                 isZooming = true;
                 hasMoved = true; 
                 lbInitDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 lbInitScale = lbScale;
-                lbImg.style.transition = 'none';
+                lbImg.style.transition = 'none'; // 缩放时无缝跟随
                 return;
             }
             
@@ -251,11 +269,13 @@
 
         function dragMove(e) {
             e.preventDefault(); 
-            
-            if(e.type === 'touchmove' && e.touches.length === 2) {
+            if (interactionLock) return;
+
+            if(e.type === 'touchmove' && e.touches.length >= 2) {
                 hasMoved = true; 
                 const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                lbScale = Math.max(0.5, Math.min(lbInitScale * (dist / lbInitDist), 5));
+                // 限制缩放极值，但不在这里回弹
+                lbScale = Math.max(0.4, Math.min(lbInitScale * (dist / lbInitDist), 5)); 
                 updateTransform();
                 return;
             }
@@ -276,30 +296,60 @@
 
         lightbox.addEventListener('mouseup', dragEnd);
         lightbox.addEventListener('touchend', dragEnd);
-        lightbox.addEventListener('mouseleave', () => { isDragging = false; });
+        lightbox.addEventListener('mouseleave', dragEnd);
 
         function dragEnd(e) {
-            if(e.type === 'touchend' && e.touches.length > 0) return; 
+            // 只要有任何一根手指离开屏幕，触发结束逻辑
+            
+            // 核心修复 1：防跳帧机制。一旦有手指离开，锁死交互 200ms
+            if (isZooming) {
+                interactionLock = true;
+                setTimeout(() => { interactionLock = false; }, 200);
+            }
+
             isDragging = false;
-            lbImg.style.transition = 'transform 0.1s ease-out'; 
-            // 核心修复：这里绝对不触发关闭动作，完全交给下方的 Click 事件来吸收幽灵点击！
+            isZooming = false;
+            
+            // 恢复物理平滑过渡
+            lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; 
+            
+            // 核心修复 2：回弹引擎。如果小于原大小，自动弹回屏幕正中央 1.0 比例
+            if (lbScale < 1) {
+                lbScale = 1;
+                currentX = 0;
+                currentY = 0;
+                updateTransform();
+            }
         }
 
-        // 统一由原生的 Click 事件来判断是否关闭
         lightbox.addEventListener('click', (e) => {
-            if (!hasMoved && !isZooming) {
-                closeLightbox(); // 只有纯粹的点按才关闭
-            }
-            // 重置状态，准备下一次动作
-            hasMoved = false;
-            isZooming = false;
+            if (!hasMoved) { closeLightbox(); }
+            hasMoved = false; 
         });
 
         lightbox.addEventListener('wheel', (e) => {
             e.preventDefault();
             lbScale += e.deltaY * -0.003;
-            lbScale = Math.max(0.5, Math.min(lbScale, 5));
+            // 电脑滚轮也加入缩小回弹底线
+            if (lbScale < 0.5) lbScale = 0.5;
+            if (lbScale > 5) lbScale = 5;
+            
+            if (lbScale < 1) {
+                // 滚轮缩小时也逐渐居中
+                currentX *= 0.8;
+                currentY *= 0.8;
+            }
             updateTransform();
+            
+            // 滚轮停止后检查是否需要弹回 1.0
+            clearTimeout(window.wheelTimeout);
+            window.wheelTimeout = setTimeout(() => {
+                if(lbScale < 1) {
+                    lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    lbScale = 1; currentX = 0; currentY = 0;
+                    updateTransform();
+                }
+            }, 150);
         }, {passive: false});
 
         function copyWechat() {
