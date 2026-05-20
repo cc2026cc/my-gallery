@@ -15,9 +15,9 @@
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
-      --text-main: #f0e6d3;       /* 改：全站暖白，替换原 #eaeaea */
+      --text-main: #f0e6d3;
       --text-light: #888888;
-      --text-body: #d6c9b8;       /* 改：正文段落用稍深一点的暖白 */
+      --text-body: #d6c9b8;
       --accent-color: #d4a373;
       --border-color: #333333;
     }
@@ -61,7 +61,7 @@
 
     /* ===== 详情页 Hero ===== */
     .detail-hero-wrapper {
-      position: relative;   /* 为印章定位提供父容器 */
+      position: relative;
       width: 100%; height: 60vh;
       background: #000; overflow: hidden;
     }
@@ -85,7 +85,6 @@
       opacity: 0.88;
       transform: rotate(-15deg);
       pointer-events: none;
-      /* 做出印章感：双层边框 */
       box-shadow: inset 0 0 0 2px #c0392b;
       padding: 6px;
       user-select: none;
@@ -138,7 +137,7 @@
     .md-body hr { border: none; border-top: 1px solid var(--border-color); margin: 1.5em 0; }
     .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 0 0 1em 0; padding: 0.3em 0 0.3em 1em; opacity: 0.8; }
 
-    /* 纯 txt 模式（兜底） */
+    /* 纯 txt 模式 */
     .txt-body { color: var(--text-body); line-height: 1.8; white-space: pre-wrap; font-size: 1.05rem; }
 
     /* ===== 按钮区域 ===== */
@@ -211,7 +210,6 @@
     // 极简 Markdown 渲染器（不含图片）
     // ─────────────────────────────────────────
     function renderMarkdown(md) {
-      // 按行处理
       const lines = md.split('\n');
       let html = '';
       let inUl = false, inOl = false;
@@ -221,10 +219,9 @@
         if (inOl) { html += '</ol>'; inOl = false; }
       };
 
-      // 行内样式：粗体、斜体
       const inline = (str) => str
-        .replace(/!\[.*?\]\(.*?\)/g, '')           // 删除图片语法（不渲染）
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')   // 链接只保留文字
+        .replace(/!\[.*?\]\(.*?\)/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
         .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -234,11 +231,9 @@
         const line = lines[i];
         const trimmed = line.trim();
 
-        // 水平线
         if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
           closeList(); html += '<hr>'; continue;
         }
-        // 标题
         const hMatch = trimmed.match(/^(#{1,3})\s+(.+)/);
         if (hMatch) {
           closeList();
@@ -246,31 +241,24 @@
           html += `<h${level}>${inline(hMatch[2])}</h${level}>`;
           continue;
         }
-        // 引用
         if (trimmed.startsWith('> ')) {
           closeList();
           html += `<blockquote>${inline(trimmed.slice(2))}</blockquote>`;
           continue;
         }
-        // 无序列表
         if (/^[-*+]\s+/.test(trimmed)) {
           if (inOl) { html += '</ol>'; inOl = false; }
           if (!inUl) { html += '<ul>'; inUl = true; }
           html += `<li>${inline(trimmed.replace(/^[-*+]\s+/, ''))}</li>`;
           continue;
         }
-        // 有序列表
         if (/^\d+\.\s+/.test(trimmed)) {
           if (inUl) { html += '</ul>'; inUl = false; }
           if (!inOl) { html += '<ol>'; inOl = true; }
           html += `<li>${inline(trimmed.replace(/^\d+\.\s+/, ''))}</li>`;
           continue;
         }
-        // 空行：关闭列表
-        if (trimmed === '') {
-          closeList(); continue;
-        }
-        // 普通段落
+        if (trimmed === '') { closeList(); continue; }
         closeList();
         html += `<p>${inline(trimmed)}</p>`;
       }
@@ -298,14 +286,13 @@
 
           let images = [];
           let infoUrl = '';
-          let infoType = ''; // 'txt' 或 'md'
+          let infoType = '';
 
           files.forEach(file => {
             const ext = file.name.split('.').pop().toLowerCase();
             if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
               images.push(file.name);
             } else if (ext === 'md' || ext === 'txt') {
-              // md 优先；若已找到 md，不被 txt 覆盖
               if (ext === 'md' || infoType === '') {
                 infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
                 infoType = ext;
@@ -318,8 +305,9 @@
             ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`
             : '';
 
-          // 首页卡片名称：文件夹名 '-' 之后的部分
-          const cardName = folderName.includes('-') ? folderName.split('-').slice(1).join('-') : folderName;
+          const cardName = folderName.includes('-')
+            ? folderName.split('-').slice(1).join('-')
+            : folderName;
 
           if (coverImg) {
             createCard(folderName, cardName, coverImg, images, infoUrl, infoType);
@@ -356,8 +344,7 @@
       document.body.style.overflow = 'hidden';
       dynamicBox.innerHTML = '<div style="text-align:center;padding:100px;color:#888;">正在加载高定展厅...</div>';
 
-      // ── 读取文档 ──
-      let docTitle = fallbackName;   // 兜底：文件夹名
+      let docTitle = fallbackName;
       let bodyHTML = '';
       let isSold = false;
 
@@ -366,29 +353,23 @@
           const res = await fetch(infoUrl);
           const buffer = await res.arrayBuffer();
           const text = new TextDecoder('utf-8').decode(buffer);
-          const lines = text.split('\n');
 
-          // 第一行作为标题（去除 Markdown # 前缀和首尾空白）
+          // ── 关键改动：只要全文包含"已结缘"三个字，就显示印章 ──
+          isSold = text.includes('已结缘');
+
+          // 统一换行符
+          const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+
+          // 第一行作为标题（去除 Markdown # 前缀）
           const rawTitle = lines[0].replace(/^#+\s*/, '').trim();
           if (rawTitle) docTitle = rawTitle;
 
-          // 最后一行判断"已结缘"
-          const lastLine = lines[lines.length - 1].trim();
-          const secondLastLine = lines.length >= 2 ? lines[lines.length - 2].trim() : '';
-          isSold = (lastLine === '已结缘' || secondLastLine === '已结缘');
-
-          // 正文：去掉第一行（标题），去掉最后的"已结缘"行
-          let bodyLines = lines.slice(1);
-          // 移除末尾的"已结缘"行（以及其前的空行）
-          while (bodyLines.length > 0 && (bodyLines[bodyLines.length - 1].trim() === '已结缘' || bodyLines[bodyLines.length - 1].trim() === '')) {
-            bodyLines.pop();
-          }
-          const bodyText = bodyLines.join('\n').trim();
+          // 正文：去掉第一行，其余全部保留（包括"已结缘"字样，让作者自己决定怎么写）
+          const bodyText = lines.slice(1).join('\n').trim();
 
           if (infoType === 'md') {
             bodyHTML = `<div class="md-body">${renderMarkdown(bodyText)}</div>`;
           } else {
-            // txt 纯文本
             bodyHTML = `<div class="txt-body">${escapeHtml(bodyText)}</div>`;
           }
         } catch (e) {
@@ -414,7 +395,6 @@
         restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
       }
 
-      // ── 渲染 ──
       dynamicBox.innerHTML = `
         <div class="modal-content-dynamic">
           <div class="detail-hero-wrapper">
@@ -435,7 +415,10 @@
     }
 
     function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     function closeModal() {
@@ -444,7 +427,8 @@
     }
 
     // ─────────────────────────────────────────
-    // 完美防跳帧 + 回弹居中 缩放引擎
+    // 灯箱缩放引擎
+    // 修复：鼠标粘连 + 手机端缩小回弹
     // ─────────────────────────────────────────
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
@@ -454,15 +438,17 @@
     let startX = 0, startY = 0, initialX = 0, initialY = 0;
     let lbInitDist = 0, lbInitScale = 1;
     let interactionLock = false;
+    let lastTouchWasZoom = false;
 
-    // 修复：在 document 级别监听 mouseup，防止鼠标移出 lightbox 后松手不触发
-    document.addEventListener('mouseup', dragEnd);
-
-    function updateTransform(animated) {
-      if (animated) {
-        // 慢回弹：0.6s 缓入曲线
+    function setTransition(slow) {
+      if (slow) {
         lbImg.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+      } else {
+        lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       }
+    }
+
+    function updateTransform() {
       lbImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${lbScale})`;
     }
 
@@ -470,24 +456,33 @@
       lbImg.src = src;
       lightbox.style.display = 'flex';
       lbScale = 1; currentX = 0; currentY = 0;
-      hasMoved = false; isZooming = false; interactionLock = false;
+      hasMoved = false; isZooming = false;
+      interactionLock = false; lastTouchWasZoom = false;
       lbImg.style.transition = 'none';
-      updateTransform(false);
-      requestAnimationFrame(() => {
-        lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      });
+      updateTransform();
+      requestAnimationFrame(() => { setTransition(false); });
     }
 
-    function closeLightbox() { lightbox.style.display = 'none'; }
+    function closeLightbox() {
+      lightbox.style.display = 'none';
+    }
 
-    // ── 拖拽开始 ──
+    // 修复粘连：mouseup 监听在 document 级别
+    document.addEventListener('mouseup', (e) => {
+      if (lightbox.style.display !== 'flex') return;
+      dragEnd(e);
+    });
+
     lightbox.addEventListener('mousedown', dragStart);
     lightbox.addEventListener('touchstart', dragStart, { passive: false });
 
     function dragStart(e) {
       if (interactionLock) return;
+
       if (e.type === 'touchstart' && e.touches.length >= 2) {
-        isZooming = true; hasMoved = true;
+        isZooming = true;
+        hasMoved = true;
+        lastTouchWasZoom = true;
         lbInitDist = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
@@ -496,7 +491,10 @@
         lbImg.style.transition = 'none';
         return;
       }
-      isDragging = true; hasMoved = false; isZooming = false;
+
+      isDragging = true;
+      hasMoved = false;
+      isZooming = false;
       const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
       startX = clientX; startY = clientY;
@@ -504,7 +502,6 @@
       lbImg.style.transition = 'none';
     }
 
-    // ── 拖拽移动 ──
     lightbox.addEventListener('mousemove', dragMove);
     lightbox.addEventListener('touchmove', dragMove, { passive: false });
 
@@ -514,12 +511,15 @@
 
       if (e.type === 'touchmove' && e.touches.length >= 2) {
         hasMoved = true;
+        isZooming = true;
+        lastTouchWasZoom = true;
         const dist = Math.hypot(
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
         );
         lbScale = Math.max(0.5, Math.min(lbInitScale * (dist / lbInitDist), 5));
-        updateTransform(false);
+        lbImg.style.transition = 'none';
+        updateTransform();
         return;
       }
 
@@ -531,62 +531,67 @@
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
       currentX = initialX + dx;
       currentY = initialY + dy;
-      updateTransform(false);
+      updateTransform();
     }
 
-    // ── 拖拽结束 ──
-    // mouseup 已在 document 级别注册，touchend 保留在 lightbox
     lightbox.addEventListener('touchend', dragEnd);
 
     function dragEnd(e) {
-      // 仅当 lightbox 可见时处理
       if (lightbox.style.display !== 'flex') return;
 
-      if (isZooming) {
+      if (isZooming || lastTouchWasZoom) {
         interactionLock = true;
-        setTimeout(() => { interactionLock = false; }, 200);
+        setTimeout(() => { interactionLock = false; }, 250);
       }
 
       isDragging = false;
       isZooming = false;
 
-      // 回弹：< 0.5 才触发，动画慢（0.6s）
+      // 手机端还有手指在屏幕上，不处理回弹
+      if (e.type === 'touchend' && e.touches.length > 0) return;
+
+      // 回弹：scale < 0.5 才触发，慢动画
       if (lbScale < 0.5) {
         lbScale = 1;
-        currentX = 0; currentY = 0;
-        updateTransform(true);   // 慢回弹
+        currentX = 0;
+        currentY = 0;
+        setTransition(true);
+        updateTransform();
       } else {
-        // 正常松手恢复快速过渡
-        lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        setTransition(false);
       }
+
+      setTimeout(() => { lastTouchWasZoom = false; }, 300);
     }
 
-    // ── 点击关闭 ──
+    // 点击关闭
     lightbox.addEventListener('click', (e) => {
-      if (!hasMoved) { closeLightbox(); }
+      if (!hasMoved && !lastTouchWasZoom) {
+        closeLightbox();
+      }
       hasMoved = false;
     });
 
-    // ── 滚轮缩放 ──
+    // 滚轮缩放（电脑端）
     lightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
       lbImg.style.transition = 'none';
+
       lbScale += e.deltaY * -0.003;
       lbScale = Math.max(0.5, Math.min(lbScale, 5));
 
       if (lbScale < 1) {
-        // 缩小时逐渐向中心靠拢
         currentX *= 0.85;
         currentY *= 0.85;
       }
-      updateTransform(false);
+      updateTransform();
 
-      // 停止滚动后，若 < 0.5 触发慢回弹
       clearTimeout(window.wheelTimeout);
       window.wheelTimeout = setTimeout(() => {
         if (lbScale < 0.5) {
           lbScale = 1; currentX = 0; currentY = 0;
-          updateTransform(true);  // 慢回弹
+          setTransition(true);
+          updateTransform();
         }
       }, 180);
     }, { passive: false });
@@ -610,7 +615,8 @@
       textArea.value = text;
       textArea.style.position = "fixed";
       document.body.appendChild(textArea);
-      textArea.focus(); textArea.select();
+      textArea.focus();
+      textArea.select();
       try {
         document.execCommand('copy');
         alert("微信号 cjq678 已复制！");
