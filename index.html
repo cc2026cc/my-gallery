@@ -19,8 +19,6 @@
       --text-body: #d6c9b8;
       --accent-color: #d4a373;
       --border-color: #333333;
-      --seal-red: #ba2a20; /* 传统朱砂红 */
-      --seal-text: #fdf5e6; /* 宣纸白 */
     }
     
     body, html {
@@ -64,51 +62,47 @@
     .detail-hero-wrapper { position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; }
     .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; cursor: zoom-in; display: block; }
     
-    /* ===== 中式传统手工阴文刻印（升级版高级印章） ===== */
+    /* ===== 绝美中式双线印章 (回字阳文) ===== */
     .sold-stamp-hero {
-      position: absolute;
-      top: 30px; 
-      right: 30px;
+      position: absolute; top: 30px; right: 30px;
       padding: 10px 8px;
-      background-color: var(--seal-red);
-      color: var(--seal-text);
-      /* 模拟手工雕刻的不规则石料边缘 */
-      border-radius: 6px 3px 8px 4px;
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
+      color: #b22c26; /* 沉稳的故宫印泥红 */
+      border: 2px solid #b22c26; /* 外圈粗线 */
+      /* 核心科技：利用透明阴影+红阴影，完美模拟出印章内圈的细线框 (双边框效果) */
+      box-shadow: inset 0 0 0 2px transparent, inset 0 0 0 3px #b22c26;
+      border-radius: 4px;
       font-family: 'Noto Serif SC', serif;
       font-size: 1.15rem;
       font-weight: 900;
       writing-mode: vertical-rl;
       text-orientation: upright;
       letter-spacing: 5px;
+      transform: rotate(-6deg); /* 自然的盖章微斜 */
       opacity: 0.95;
-      transform: rotate(-5deg); /* 更加自然的盖章微侧角度 */
       pointer-events: none;
-      /* 增加立体投影与内部微小阴影模拟石材凹陷 */
-      box-shadow: 2px 4px 12px rgba(186, 42, 32, 0.4), inset 0 0 3px rgba(0,0,0,0.2);
-      user-select: none;
+      background-color: transparent; /* 绝对透明底色，高级留白 */
     }
     
+    /* ===== 印章：按钮旁行内版 ===== */
     .sold-stamp-inline {
       display: inline-flex;
-      background-color: var(--seal-red);
-      color: var(--seal-text);
       padding: 6px 5px;
-      border-radius: 4px 2px 5px 3px;
+      color: #b22c26;
+      border: 1.5px solid #b22c26;
+      /* 同比缩小的双线边框 */
+      box-shadow: inset 0 0 0 1.5px transparent, inset 0 0 0 2.5px #b22c26;
+      border-radius: 3px;
       font-family: 'Noto Serif SC', serif;
       font-size: 0.85rem;
       font-weight: 900;
       writing-mode: vertical-rl;
       text-orientation: upright;
       letter-spacing: 2px;
-      opacity: 0.95;
-      transform: rotate(-5deg);
-      box-shadow: 1px 2px 6px rgba(186, 42, 32, 0.3);
+      transform: rotate(-6deg);
       vertical-align: middle;
       user-select: none;
       flex-shrink: 0;
+      background-color: transparent;
     }
     
     /* ===== 详情文字卡片 ===== */
@@ -125,25 +119,24 @@
       font-weight: 400;
       margin-bottom: 30px;
     }
-    /* 极致排版优化：取消 pre-wrap，使用严格避头尾断行 */
     .md-body p { 
       margin: 0 0 1.5em 0; 
-      white-space: normal; /* 让浏览器接管换行 */
+      white-space: normal; 
       text-align: justify; 
-      text-justify: inter-character; /* 中文自适应均分缝隙 */
+      text-justify: inter-character; 
       word-break: normal;
-      line-break: strict; /* 严格避开行首行尾的标点符号 */
+      line-break: strict; 
     }
     .md-body h1, .md-body h2, .md-body h3 { font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.8em 0 0.8em 0; }
     .md-body h1 { font-size: 1.6rem; text-align: center; }
     .md-body h2 { font-size: 1.3rem; border-left: 4px solid var(--accent-color); padding-left: 12px; }
     .md-body h3 { font-size: 1.1rem; }
     
-    /* 修复加粗样式：非常醒目，且带有微弱底色 */
+    /* 加粗样式 */
     .md-body strong { 
       color: var(--accent-color); 
       font-weight: 900; 
-      background: rgba(212, 163, 115, 0.08); /* 微微的底色托底 */
+      background: rgba(212, 163, 115, 0.08); 
       padding: 0 2px;
       border-radius: 2px;
     }
@@ -154,28 +147,11 @@
     .md-body hr { border: none; border-top: 1px dashed #444; margin: 2.5em auto; width: 50%; }
     .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 1.5em 0; padding: 15px 20px; background: rgba(212, 163, 115, 0.08); border-radius: 0 4px 4px 0; color: var(--text-main); font-style: italic; text-align: justify; text-justify: inter-character; }
     
-    /* 纯 txt 模式排版同步优化 */
     .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: 'Noto Serif SC', serif; }
     
     /* ===== 按钮区域及印章 ===== */
-    .btn-row { 
-      display: flex; 
-      align-items: center; 
-      justify-content: flex-start;
-      margin-top: 30px; 
-      flex-wrap: nowrap; 
-      gap: 15px; 
-    }
-    .btn-wechat { 
-      padding: 12px 25px; 
-      background-color: var(--accent-color); 
-      color: #121212; 
-      font-weight: 600; 
-      border-radius: 2px; 
-      cursor: pointer; 
-      transition: background 0.3s;
-      white-space: nowrap; 
-    }
+    .btn-row { display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; flex-wrap: nowrap; gap: 15px; }
+    .btn-wechat { padding: 12px 25px; background-color: var(--accent-color); color: #121212; font-weight: 600; border-radius: 2px; cursor: pointer; transition: background 0.3s; white-space: nowrap; }
     .btn-wechat:hover { background-color: #e5b686; }
     
     @media (max-width: 400px) {
@@ -189,12 +165,7 @@
     
     /* ===== Lightbox ===== */
     .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,1); z-index: 2000; justify-content: center; align-items: center; overflow: hidden; }
-    .lightbox img {
-      width: auto; height: auto; max-width: 100%; max-height: 100vh;
-      object-fit: contain;
-      user-select: none; -webkit-user-drag: none; pointer-events: none;
-      transform-origin: center center; will-change: transform;
-    }
+    .lightbox img { width: auto; height: auto; max-width: 100%; max-height: 100vh; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; transform-origin: center center; will-change: transform; }
     
     /* ===== Footer ===== */
     footer { text-align: center; padding: 40px 20px; font-size: 0.85rem; color: var(--text-light); border-top: 1px solid var(--border-color); margin-top: 50px; }
@@ -242,9 +213,6 @@
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
-    // ─────────────────────────────────────────
-    // 重写极简 Markdown 渲染器 (绝对确保粗体生效)
-    // ─────────────────────────────────────────
     function renderMarkdown(md) {
       const lines = md.split('\n');
       let html = '';
@@ -257,10 +225,8 @@
       
       const inline = (str) => {
         let s = str;
-        // 先处理图片和链接，防止内部符号被当成加粗
         s = s.replace(/!\[.*?\]\(.*?\)/g, '');
         s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-        // 核心修复：依次强制匹配加粗和斜体（解决之前嵌套正则失效问题）
         s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         s = s.replace(/__(.*?)__/g, '<strong>$1</strong>');
         s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -314,9 +280,6 @@
       return html;
     }
     
-    // ─────────────────────────────────────────
-    // 读取产品列表
-    // ─────────────────────────────────────────
     async function initGallery() {
       const galleryElement = document.getElementById('gallery');
       const loadingElement = document.getElementById('loading');
@@ -382,9 +345,6 @@
       gallery.appendChild(card);
     }
     
-    // ─────────────────────────────────────────
-    // 打开产品详情弹窗
-    // ─────────────────────────────────────────
     async function openModal(folderName, fallbackName, images, infoUrl, infoType) {
       const modal = document.getElementById('product-modal');
       const dynamicBox = document.getElementById('modal-dynamic-box');
@@ -461,7 +421,7 @@
     }
     
     // ─────────────────────────────────────────
-    // 灯箱缩放引擎 (增加强制重绘解决PC端不丝滑问题)
+    // 终极灯箱缩放引擎 (绝对缓慢阻尼回弹)
     // ─────────────────────────────────────────
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
@@ -475,7 +435,8 @@
     
     function setTransition(slow) {
       if (slow) {
-        lbImg.style.transition = 'transform 1.2s cubic-bezier(0.1, 0.8, 0.1, 1)';
+        // 霸道的慢动作：长达 1.5 秒的悬浮回弹
+        lbImg.style.transition = 'transform 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
       } else {
         lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       }
@@ -509,6 +470,7 @@
     lightbox.addEventListener('touchstart', dragStart, { passive: false });
     
     function dragStart(e) {
+      // 动画回弹播放中时，彻底无视任何手指/鼠标的抓取
       if (interactionLock) return;
       
       if (e.type === 'mousedown') {
@@ -581,6 +543,7 @@
       if (lightbox.style.display !== 'flex') return;
       
       if (isZooming || lastTouchWasZoom) {
+        // 放手后给普通交互上锁一小会儿，防止乱跳
         interactionLock = true;
         setTimeout(() => { interactionLock = false; }, 250);
       }
@@ -591,11 +554,14 @@
       if (e.type === 'touchend' && e.touches.length > 0) return;
       
       if (lbScale < 0.6) {
+        // 手机端：进入 1.5 秒霸道慢速回弹，期间完全上锁
+        interactionLock = true;
         lbScale = 1;
         currentX = 0;
         currentY = 0;
         setTransition(true);
         updateTransform();
+        setTimeout(() => { interactionLock = false; }, 1500); // 1.5秒后才解锁
       } else {
         setTransition(false);
       }
@@ -610,14 +576,17 @@
       hasMoved = false;
     });
     
-    // 电脑端滚轮：加入强制重绘机制，彻底解决动画被跳过导致的不丝滑
+    // 电脑端滚轮：加入底层动画锁，强制杜绝信号打断
     lightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
+      
+      // 如果正在进行 1.5 秒的漂浮回弹，直接无视用户的滚轮乱滚，保住丝滑感！
+      if (interactionLock) return;
+      
       lbImg.style.transition = 'none';
       
-      // 优化电脑端手感：小于1时增加阻力，防止一下子缩太小
       if (lbScale < 1) {
-        lbScale += e.deltaY * -0.001;
+        lbScale += e.deltaY * -0.001; // 放大阻力，防止太容易滚到下限
       } else {
         lbScale += e.deltaY * -0.003;
       }
@@ -633,14 +602,15 @@
       clearTimeout(window.wheelTimeout);
       window.wheelTimeout = setTimeout(() => {
         if (lbScale < 0.6) {
+          // 触发回弹！立即挂上动画锁！
+          interactionLock = true;
           lbScale = 1; 
           currentX = 0; 
           currentY = 0;
-          // 核心黑科技：强迫浏览器在改变 transition 之前计算上一帧的状态
-          void lbImg.offsetWidth;
-          
           setTransition(true);
           updateTransform();
+          // 锁死 1.5 秒，这期间你怎么滚鼠标都不会打断动画了
+          setTimeout(() => { interactionLock = false; }, 1500); 
         }
       }, 150);
     }, { passive: false });
