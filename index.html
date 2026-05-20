@@ -29,7 +29,7 @@
       scroll-behavior: smooth;
     }
     
-    h1, h2, h3, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
+    h1, h2, h3, h4, h5, h6, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
     
     /* ===== Hero ===== */
     .hero { max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px 20px; text-align: center; animation: fadeIn 1s ease-out; }
@@ -84,19 +84,25 @@
     /* ===== 详情文字卡片 ===== */
     .detail-text-card { position: relative; max-width: 800px; margin: -80px auto 40px auto; background: var(--card-bg); padding: 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10; }
     @media (max-width: 768px) { .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } }
-    .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
+    .detail-text-card h2.main-title { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
     /* ===== Markdown 顶级中文排印标准 ===== */
     .md-body { color: var(--text-body); font-size: 1.05rem; line-height: 2.1; font-family: 'Noto Serif SC', serif; font-weight: 400; margin-bottom: 30px; }
     .md-body p { margin: 0 0 1.5em 0; white-space: normal; text-align: justify; text-justify: inter-character; word-break: normal; line-break: strict; }
     
-    /* 【重磅修复】：恢复小标题的相对大字号，让层级结构分明 */
-    .md-body h1, .md-body h2, .md-body h3 { font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.8em 0 0.8em 0; }
-    .md-body h1 { font-size: 2.2rem; text-align: center; margin-top: 2em; }
-    .md-body h2 { font-size: 1.6rem; border-left: 5px solid var(--accent-color); padding-left: 15px; margin-top: 1.5em; }
-    .md-body h3 { font-size: 1.3rem; margin-top: 1.2em; }
+    /* 【重磅修复】：严格按照 Markdown 原生比例缩放各级标题 */
+    .md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 { 
+      font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.5em 0 0.8em 0; line-height: 1.4; 
+    }
+    .md-body h1 { font-size: 2.2em; text-align: center; }
+    .md-body h2 { font-size: 1.6em; border-left: 5px solid var(--accent-color); padding-left: 15px; }
+    .md-body h3 { font-size: 1.3em; color: var(--text-main); }
+    .md-body h4 { font-size: 1.15em; }
+    .md-body h5 { font-size: 1.05em; }
+    .md-body h6 { font-size: 1em; color: var(--text-light); }
     
-    .md-body strong { color: var(--accent-color); font-weight: 900; background: rgba(212, 163, 115, 0.08); padding: 0 2px; border-radius: 2px; }
+    /* 干净的高亮加粗，不改变文字本身的体积感 */
+    .md-body strong { color: var(--accent-color); font-weight: 900; }
     .md-body em { font-style: italic; opacity: 0.8; }
     .md-body ul, .md-body ol { padding-left: 1.5em; margin: 1em 0; background: rgba(255,255,255,0.02); padding: 15px 15px 15px 35px; border-radius: 4px; text-align: justify; text-justify: inter-character; }
     .md-body li { margin-bottom: 0.5em; }
@@ -165,6 +171,14 @@
   </footer>
   
   <script>
+    // 【核心修复：消除 FOUC 闪现】在页面和 DOM 解析的最初阶段，立刻拦截并盖上黑幕加载区
+    const initialHash = decodeURIComponent(window.location.hash.substring(1));
+    if (initialHash) {
+      document.getElementById('product-modal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      document.getElementById('modal-dynamic-box').innerHTML = '<div style="text-align:center;padding:150px 20px;color:#888;">正在进入专属展厅...</div>';
+    }
+
     const GITHUB_USERNAME = "cc2026cc";
     const REPO_NAME = "my-gallery";
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
@@ -200,7 +214,8 @@
           closeList(); html += '<hr>'; continue;
         }
         
-        const hMatch = trimmed.match(/^(#{1,6})\s+(.+)/);
+        // 【核心修复】：放宽正则匹配，即使 # 后面没有空格，也能被正确识别为标题
+        const hMatch = trimmed.match(/^(#{1,6})\s*(.+)/);
         if (hMatch) {
           closeList();
           const level = hMatch[1].length;
@@ -285,7 +300,6 @@
         loadingElement.style.display = 'none';
         galleryElement.style.opacity = '1';
         
-        // 【核心修复】：页面加载完毕后，检测网址中是否有 #hash，如果有，自动打开对应的产品！
         setTimeout(() => {
           const hash = decodeURIComponent(window.location.hash.substring(1));
           if (hash) {
@@ -308,7 +322,6 @@
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
       card.className = 'product-card';
-      // 【新增】：给每个卡片绑定专属文件夹名字，方便哈希路由查找
       card.setAttribute('data-folder', folderName);
       card.innerHTML = `
         <img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">
@@ -319,7 +332,6 @@
     }
     
     async function openModal(folderName, fallbackName, images, infoUrl, infoType) {
-      // 【核心修复】：点开产品时，同步更改浏览器网址的 Hash 值（不刷新页面）
       if (decodeURIComponent(window.location.hash.substring(1)) !== folderName) {
         window.history.pushState(null, '', '#' + encodeURIComponent(folderName));
       }
@@ -329,7 +341,6 @@
       
       modal.style.display = 'block';
       document.body.style.overflow = 'hidden';
-      dynamicBox.innerHTML = '<div style="text-align:center;padding:100px;color:#888;">正在加载高定展厅...</div>';
       
       let docTitle = fallbackName;
       let bodyHTML = '';
@@ -343,8 +354,6 @@
           
           isSold = text.includes('已结缘');
           const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-          
-          // 【核心修复】：清洗大标题中的Markdown格式符号（去掉* _ ~等符号）
           const rawTitle = lines[0].replace(/^#+\s*/, '').replace(/[*_~`]/g, '').trim();
           if (rawTitle) docTitle = rawTitle;
           
@@ -379,7 +388,7 @@
             ${stampHero}
           </div>
           <div class="detail-text-card">
-            <h2 class="serif">${escapeHtml(docTitle)}</h2>
+            <h2 class="serif main-title">${escapeHtml(docTitle)}</h2>
             ${bodyHTML}
             <div class="btn-row">
               <div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>
@@ -398,13 +407,11 @@
     function closeModal() {
       document.getElementById('product-modal').style.display = 'none';
       document.body.style.overflow = 'auto';
-      // 【核心修复】：关闭弹窗时，清除网址上的 Hash 值
       if (window.location.hash) {
         window.history.pushState(null, '', window.location.pathname + window.location.search);
       }
     }
     
-    // 【核心修复】：监听浏览器的“前进/后退”按键。手机端按返回键时优雅关闭弹窗！
     window.addEventListener('popstate', () => {
       const hash = decodeURIComponent(window.location.hash.substring(1));
       if (hash) {
