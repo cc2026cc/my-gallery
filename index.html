@@ -65,44 +65,20 @@
     /* ===== 绝美中式双线印章 (回字阳文) ===== */
     .sold-stamp-hero {
       position: absolute; top: 30px; right: 30px;
-      padding: 10px 8px;
-      color: #b22c26; /* 沉稳的故宫印泥红 */
-      border: 2px solid #b22c26; /* 外圈粗线 */
-      /* 核心科技：利用透明阴影+红阴影，完美模拟出印章内圈的细线框 (双边框效果) */
+      padding: 10px 8px; color: #b22c26; border: 2px solid #b22c26;
       box-shadow: inset 0 0 0 2px transparent, inset 0 0 0 3px #b22c26;
-      border-radius: 4px;
-      font-family: 'Noto Serif SC', serif;
-      font-size: 1.15rem;
-      font-weight: 900;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 5px;
-      transform: rotate(-6deg); /* 自然的盖章微斜 */
-      opacity: 0.95;
-      pointer-events: none;
-      background-color: transparent; /* 绝对透明底色，高级留白 */
+      border-radius: 4px; font-family: 'Noto Serif SC', serif;
+      font-size: 1.15rem; font-weight: 900; writing-mode: vertical-rl;
+      text-orientation: upright; letter-spacing: 5px; transform: rotate(-6deg);
+      opacity: 0.95; pointer-events: none; background-color: transparent;
     }
-    
-    /* ===== 印章：按钮旁行内版 ===== */
     .sold-stamp-inline {
-      display: inline-flex;
-      padding: 6px 5px;
-      color: #b22c26;
-      border: 1.5px solid #b22c26;
-      /* 同比缩小的双线边框 */
+      display: inline-flex; padding: 6px 5px; color: #b22c26; border: 1.5px solid #b22c26;
       box-shadow: inset 0 0 0 1.5px transparent, inset 0 0 0 2.5px #b22c26;
-      border-radius: 3px;
-      font-family: 'Noto Serif SC', serif;
-      font-size: 0.85rem;
-      font-weight: 900;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 2px;
-      transform: rotate(-6deg);
-      vertical-align: middle;
-      user-select: none;
-      flex-shrink: 0;
-      background-color: transparent;
+      border-radius: 3px; font-family: 'Noto Serif SC', serif; font-size: 0.85rem;
+      font-weight: 900; writing-mode: vertical-rl; text-orientation: upright;
+      letter-spacing: 2px; transform: rotate(-6deg); vertical-align: middle;
+      user-select: none; flex-shrink: 0; background-color: transparent;
     }
     
     /* ===== 详情文字卡片 ===== */
@@ -111,35 +87,16 @@
     .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
     /* ===== Markdown 顶级中文排印标准 ===== */
-    .md-body { 
-      color: var(--text-body); 
-      font-size: 1.05rem; 
-      line-height: 2.1; 
-      font-family: 'Noto Serif SC', serif; 
-      font-weight: 400;
-      margin-bottom: 30px;
-    }
-    .md-body p { 
-      margin: 0 0 1.5em 0; 
-      white-space: normal; 
-      text-align: justify; 
-      text-justify: inter-character; 
-      word-break: normal;
-      line-break: strict; 
-    }
-    .md-body h1, .md-body h2, .md-body h3 { font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.8em 0 0.8em 0; }
-    .md-body h1 { font-size: 1.6rem; text-align: center; }
-    .md-body h2 { font-size: 1.3rem; border-left: 4px solid var(--accent-color); padding-left: 12px; }
-    .md-body h3 { font-size: 1.1rem; }
+    .md-body { color: var(--text-body); font-size: 1.05rem; line-height: 2.1; font-family: 'Noto Serif SC', serif; font-weight: 400; margin-bottom: 30px; }
+    .md-body p { margin: 0 0 1.5em 0; white-space: normal; text-align: justify; text-justify: inter-character; word-break: normal; line-break: strict; }
     
-    /* 加粗样式 */
-    .md-body strong { 
-      color: var(--accent-color); 
-      font-weight: 900; 
-      background: rgba(212, 163, 115, 0.08); 
-      padding: 0 2px;
-      border-radius: 2px;
-    }
+    /* 【重磅修复】：恢复小标题的相对大字号，让层级结构分明 */
+    .md-body h1, .md-body h2, .md-body h3 { font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.8em 0 0.8em 0; }
+    .md-body h1 { font-size: 2.2rem; text-align: center; margin-top: 2em; }
+    .md-body h2 { font-size: 1.6rem; border-left: 5px solid var(--accent-color); padding-left: 15px; margin-top: 1.5em; }
+    .md-body h3 { font-size: 1.3rem; margin-top: 1.2em; }
+    
+    .md-body strong { color: var(--accent-color); font-weight: 900; background: rgba(212, 163, 115, 0.08); padding: 0 2px; border-radius: 2px; }
     .md-body em { font-style: italic; opacity: 0.8; }
     .md-body ul, .md-body ol { padding-left: 1.5em; margin: 1em 0; background: rgba(255,255,255,0.02); padding: 15px 15px 15px 35px; border-radius: 4px; text-align: justify; text-justify: inter-character; }
     .md-body li { margin-bottom: 0.5em; }
@@ -328,6 +285,20 @@
         loadingElement.style.display = 'none';
         galleryElement.style.opacity = '1';
         
+        // 【核心修复】：页面加载完毕后，检测网址中是否有 #hash，如果有，自动打开对应的产品！
+        setTimeout(() => {
+          const hash = decodeURIComponent(window.location.hash.substring(1));
+          if (hash) {
+            const cards = document.querySelectorAll('.product-card');
+            for (let card of cards) {
+              if (card.getAttribute('data-folder') === hash) {
+                card.click();
+                break;
+              }
+            }
+          }
+        }, 100);
+        
       } catch (error) {
         loadingElement.innerHTML = '⚠ 数据读取失败。';
       }
@@ -337,6 +308,8 @@
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
       card.className = 'product-card';
+      // 【新增】：给每个卡片绑定专属文件夹名字，方便哈希路由查找
+      card.setAttribute('data-folder', folderName);
       card.innerHTML = `
         <img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">
         <div class="product-info"><h3 class="serif">${cardName}</h3></div>
@@ -346,6 +319,11 @@
     }
     
     async function openModal(folderName, fallbackName, images, infoUrl, infoType) {
+      // 【核心修复】：点开产品时，同步更改浏览器网址的 Hash 值（不刷新页面）
+      if (decodeURIComponent(window.location.hash.substring(1)) !== folderName) {
+        window.history.pushState(null, '', '#' + encodeURIComponent(folderName));
+      }
+      
       const modal = document.getElementById('product-modal');
       const dynamicBox = document.getElementById('modal-dynamic-box');
       
@@ -365,7 +343,9 @@
           
           isSold = text.includes('已结缘');
           const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-          const rawTitle = lines[0].replace(/^#+\s*/, '').trim();
+          
+          // 【核心修复】：清洗大标题中的Markdown格式符号（去掉* _ ~等符号）
+          const rawTitle = lines[0].replace(/^#+\s*/, '').replace(/[*_~`]/g, '').trim();
           if (rawTitle) docTitle = rawTitle;
           
           const bodyText = lines.slice(1).join('\n').trim();
@@ -418,7 +398,28 @@
     function closeModal() {
       document.getElementById('product-modal').style.display = 'none';
       document.body.style.overflow = 'auto';
+      // 【核心修复】：关闭弹窗时，清除网址上的 Hash 值
+      if (window.location.hash) {
+        window.history.pushState(null, '', window.location.pathname + window.location.search);
+      }
     }
+    
+    // 【核心修复】：监听浏览器的“前进/后退”按键。手机端按返回键时优雅关闭弹窗！
+    window.addEventListener('popstate', () => {
+      const hash = decodeURIComponent(window.location.hash.substring(1));
+      if (hash) {
+        const cards = document.querySelectorAll('.product-card');
+        for (let card of cards) {
+          if (card.getAttribute('data-folder') === hash) {
+            card.click();
+            break;
+          }
+        }
+      } else {
+        document.getElementById('product-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    });
     
     // ─────────────────────────────────────────
     // 终极灯箱缩放引擎 (绝对缓慢阻尼回弹)
@@ -435,7 +436,6 @@
     
     function setTransition(slow) {
       if (slow) {
-        // 霸道的慢动作：长达 1.5 秒的悬浮回弹
         lbImg.style.transition = 'transform 1.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
       } else {
         lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -470,35 +470,20 @@
     lightbox.addEventListener('touchstart', dragStart, { passive: false });
     
     function dragStart(e) {
-      // 动画回弹播放中时，彻底无视任何手指/鼠标的抓取
       if (interactionLock) return;
-      
-      if (e.type === 'mousedown') {
-        e.preventDefault();
-      }
+      if (e.type === 'mousedown') e.preventDefault();
       
       if (e.type === 'touchstart' && e.touches.length >= 2) {
-        isZooming = true;
-        hasMoved = true;
-        lastTouchWasZoom = true;
-        lbInitDist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-        lbInitScale = lbScale;
-        lbImg.style.transition = 'none';
+        isZooming = true; hasMoved = true; lastTouchWasZoom = true;
+        lbInitDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+        lbInitScale = lbScale; lbImg.style.transition = 'none';
         return;
       }
       
-      isDragging = true;
-      hasMoved = false;
-      isZooming = false;
-      
+      isDragging = true; hasMoved = false; isZooming = false;
       const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-      
-      startX = clientX; startY = clientY;
-      initialX = currentX; initialY = currentY;
+      startX = clientX; startY = clientY; initialX = currentX; initialY = currentY;
       lbImg.style.transition = 'none';
     }
     
@@ -510,13 +495,8 @@
       if (interactionLock) return;
       
       if (e.type === 'touchmove' && e.touches.length >= 2) {
-        hasMoved = true;
-        isZooming = true;
-        lastTouchWasZoom = true;
-        const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
+        hasMoved = true; isZooming = true; lastTouchWasZoom = true;
+        const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
         lbScale = Math.max(0.3, Math.min(lbInitScale * (dist / lbInitDist), 5));
         lbImg.style.transition = 'none';
         updateTransform();
@@ -524,16 +504,11 @@
       }
       
       if (!isDragging) return;
-      
       const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-      const dx = clientX - startX;
-      const dy = clientY - startY;
-      
+      const dx = clientX - startX; const dy = clientY - startY;
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
-      
-      currentX = initialX + dx;
-      currentY = initialY + dy;
+      currentX = initialX + dx; currentY = initialY + dy;
       updateTransform();
     }
     
@@ -541,75 +516,44 @@
     
     function dragEnd(e) {
       if (lightbox.style.display !== 'flex') return;
-      
       if (isZooming || lastTouchWasZoom) {
-        // 放手后给普通交互上锁一小会儿，防止乱跳
-        interactionLock = true;
-        setTimeout(() => { interactionLock = false; }, 250);
+        interactionLock = true; setTimeout(() => { interactionLock = false; }, 250);
       }
-      
-      isDragging = false;
-      isZooming = false;
-      
+      isDragging = false; isZooming = false;
       if (e.type === 'touchend' && e.touches.length > 0) return;
       
       if (lbScale < 0.6) {
-        // 手机端：进入 1.5 秒霸道慢速回弹，期间完全上锁
-        interactionLock = true;
-        lbScale = 1;
-        currentX = 0;
-        currentY = 0;
-        setTransition(true);
-        updateTransform();
-        setTimeout(() => { interactionLock = false; }, 1500); // 1.5秒后才解锁
+        interactionLock = true; lbScale = 1; currentX = 0; currentY = 0;
+        setTransition(true); updateTransform();
+        setTimeout(() => { interactionLock = false; }, 1500); 
       } else {
         setTransition(false);
       }
-      
       setTimeout(() => { lastTouchWasZoom = false; }, 300);
     }
     
     lightbox.addEventListener('click', (e) => {
-      if (!hasMoved && !lastTouchWasZoom) {
-        closeLightbox();
-      }
+      if (!hasMoved && !lastTouchWasZoom) closeLightbox();
       hasMoved = false;
     });
     
-    // 电脑端滚轮：加入底层动画锁，强制杜绝信号打断
     lightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
-      
-      // 如果正在进行 1.5 秒的漂浮回弹，直接无视用户的滚轮乱滚，保住丝滑感！
       if (interactionLock) return;
       
       lbImg.style.transition = 'none';
-      
-      if (lbScale < 1) {
-        lbScale += e.deltaY * -0.001; // 放大阻力，防止太容易滚到下限
-      } else {
-        lbScale += e.deltaY * -0.003;
-      }
+      if (lbScale < 1) lbScale += e.deltaY * -0.001; 
+      else lbScale += e.deltaY * -0.003;
       
       lbScale = Math.max(0.3, Math.min(lbScale, 5));
-      
-      if (lbScale < 1) {
-        currentX *= 0.85;
-        currentY *= 0.85;
-      }
+      if (lbScale < 1) { currentX *= 0.85; currentY *= 0.85; }
       updateTransform();
       
       clearTimeout(window.wheelTimeout);
       window.wheelTimeout = setTimeout(() => {
         if (lbScale < 0.6) {
-          // 触发回弹！立即挂上动画锁！
-          interactionLock = true;
-          lbScale = 1; 
-          currentX = 0; 
-          currentY = 0;
-          setTransition(true);
-          updateTransform();
-          // 锁死 1.5 秒，这期间你怎么滚鼠标都不会打断动画了
+          interactionLock = true; lbScale = 1; currentX = 0; currentY = 0;
+          setTransition(true); updateTransform();
           setTimeout(() => { interactionLock = false; }, 1500); 
         }
       }, 150);
@@ -631,17 +575,10 @@
     
     function fallbackCopyTextToClipboard(text) {
       const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        alert("微信号 cjq678 已复制！");
-      } catch (err) {
-        alert("请手动输入：cjq678");
-      }
+      textArea.value = text; textArea.style.position = "fixed";
+      document.body.appendChild(textArea); textArea.focus(); textArea.select();
+      try { document.execCommand('copy'); alert("微信号 cjq678 已复制！"); } 
+      catch (err) { alert("请手动输入：cjq678"); }
       document.body.removeChild(textArea);
     }
     
