@@ -19,6 +19,8 @@
       --text-body: #d6c9b8;
       --accent-color: #d4a373;
       --border-color: #333333;
+      --seal-red: #ba2a20; /* 传统朱砂红 */
+      --seal-text: #fdf5e6; /* 宣纸白 */
     }
     
     body, html {
@@ -62,30 +64,51 @@
     .detail-hero-wrapper { position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; }
     .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; cursor: zoom-in; display: block; }
     
-    /* ===== 中式篆刻印章：首图右上角 ===== */
+    /* ===== 中式传统手工阴文刻印（升级版高级印章） ===== */
     .sold-stamp-hero {
       position: absolute;
       top: 30px; 
       right: 30px;
-      padding: 8px 6px;
-      border: 2px solid #C3272B;
-      border-radius: 6px;
+      padding: 10px 8px;
+      background-color: var(--seal-red);
+      color: var(--seal-text);
+      /* 模拟手工雕刻的不规则石料边缘 */
+      border-radius: 6px 3px 8px 4px;
       display: flex; 
       align-items: center; 
       justify-content: center;
-      color: #C3272B;
       font-family: 'Noto Serif SC', serif;
       font-size: 1.15rem;
       font-weight: 900;
       writing-mode: vertical-rl;
       text-orientation: upright;
-      letter-spacing: 4px;
-      opacity: 0.9;
-      transform: rotate(-8deg);
+      letter-spacing: 5px;
+      opacity: 0.95;
+      transform: rotate(-5deg); /* 更加自然的盖章微侧角度 */
       pointer-events: none;
-      box-shadow: inset 0 0 0 2px #C3272B, 0 4px 15px rgba(0,0,0,0.5);
+      /* 增加立体投影与内部微小阴影模拟石材凹陷 */
+      box-shadow: 2px 4px 12px rgba(186, 42, 32, 0.4), inset 0 0 3px rgba(0,0,0,0.2);
       user-select: none;
-      background: rgba(255,255,255,0.02);
+    }
+    
+    .sold-stamp-inline {
+      display: inline-flex;
+      background-color: var(--seal-red);
+      color: var(--seal-text);
+      padding: 6px 5px;
+      border-radius: 4px 2px 5px 3px;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 0.85rem;
+      font-weight: 900;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 2px;
+      opacity: 0.95;
+      transform: rotate(-5deg);
+      box-shadow: 1px 2px 6px rgba(186, 42, 32, 0.3);
+      vertical-align: middle;
+      user-select: none;
+      flex-shrink: 0;
     }
     
     /* ===== 详情文字卡片 ===== */
@@ -93,44 +116,54 @@
     @media (max-width: 768px) { .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } }
     .detail-text-card h2 { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
-    /* ===== Markdown 渲染区高级排版 (两端对齐修复) ===== */
+    /* ===== Markdown 顶级中文排印标准 ===== */
     .md-body { 
       color: var(--text-body); 
       font-size: 1.05rem; 
-      line-height: 2; 
+      line-height: 2.1; 
       font-family: 'Noto Serif SC', serif; 
       font-weight: 400;
       margin-bottom: 30px;
     }
-    /* 强制两端对齐，彻底解决右侧参差不齐的问题 */
+    /* 极致排版优化：取消 pre-wrap，使用严格避头尾断行 */
     .md-body p { 
-      margin: 0 0 1.2em 0; 
-      white-space: pre-wrap; 
+      margin: 0 0 1.5em 0; 
+      white-space: normal; /* 让浏览器接管换行 */
       text-align: justify; 
-      text-justify: inter-ideograph; 
+      text-justify: inter-character; /* 中文自适应均分缝隙 */
+      word-break: normal;
+      line-break: strict; /* 严格避开行首行尾的标点符号 */
     }
     .md-body h1, .md-body h2, .md-body h3 { font-family: 'Noto Serif SC', serif; color: var(--text-main); margin: 1.8em 0 0.8em 0; }
     .md-body h1 { font-size: 1.6rem; text-align: center; }
     .md-body h2 { font-size: 1.3rem; border-left: 4px solid var(--accent-color); padding-left: 12px; }
     .md-body h3 { font-size: 1.1rem; }
-    .md-body strong { color: var(--accent-color); font-weight: 900; }
+    
+    /* 修复加粗样式：非常醒目，且带有微弱底色 */
+    .md-body strong { 
+      color: var(--accent-color); 
+      font-weight: 900; 
+      background: rgba(212, 163, 115, 0.08); /* 微微的底色托底 */
+      padding: 0 2px;
+      border-radius: 2px;
+    }
     .md-body em { font-style: italic; opacity: 0.8; }
-    .md-body ul, .md-body ol { padding-left: 1.5em; margin: 1em 0; background: rgba(255,255,255,0.02); padding: 15px 15px 15px 35px; border-radius: 4px; text-align: justify; text-justify: inter-ideograph; }
+    .md-body ul, .md-body ol { padding-left: 1.5em; margin: 1em 0; background: rgba(255,255,255,0.02); padding: 15px 15px 15px 35px; border-radius: 4px; text-align: justify; text-justify: inter-character; }
     .md-body li { margin-bottom: 0.5em; }
     .md-body li::marker { color: var(--accent-color); }
     .md-body hr { border: none; border-top: 1px dashed #444; margin: 2.5em auto; width: 50%; }
-    .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 1.5em 0; padding: 15px 20px; background: rgba(212, 163, 115, 0.08); border-radius: 0 4px 4px 0; color: var(--text-main); font-style: italic; text-align: justify; text-justify: inter-ideograph; }
+    .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 1.5em 0; padding: 15px 20px; background: rgba(212, 163, 115, 0.08); border-radius: 0 4px 4px 0; color: var(--text-main); font-style: italic; text-align: justify; text-justify: inter-character; }
     
-    /* 纯 txt 模式排版优化 */
-    .txt-body { color: var(--text-body); line-height: 2; white-space: pre-wrap; font-size: 1.05rem; text-align: justify; text-justify: inter-ideograph; font-family: 'Noto Serif SC', serif; }
+    /* 纯 txt 模式排版同步优化 */
+    .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: 'Noto Serif SC', serif; }
     
-    /* ===== 按钮区域及印章 (移动端同行排列修复) ===== */
+    /* ===== 按钮区域及印章 ===== */
     .btn-row { 
       display: flex; 
       align-items: center; 
       justify-content: flex-start;
       margin-top: 30px; 
-      flex-wrap: nowrap; /* 强制不换行 */
+      flex-wrap: nowrap; 
       gap: 15px; 
     }
     .btn-wechat { 
@@ -141,36 +174,13 @@
       border-radius: 2px; 
       cursor: pointer; 
       transition: background 0.3s;
-      white-space: nowrap; /* 强制按钮文字不换行 */
+      white-space: nowrap; 
     }
     .btn-wechat:hover { background-color: #e5b686; }
     
-    /* 中式篆刻印章：按钮旁行内版 */
-    .sold-stamp-inline {
-      display: inline-flex;
-      padding: 5px 4px;
-      border: 1.5px solid #C3272B;
-      border-radius: 4px;
-      color: #C3272B;
-      font-family: 'Noto Serif SC', serif;
-      font-size: 0.85rem;
-      font-weight: 900;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 2px;
-      opacity: 0.9;
-      transform: rotate(-8deg);
-      box-shadow: inset 0 0 0 1.5px #C3272B;
-      vertical-align: middle;
-      user-select: none;
-      flex-shrink: 0; /* 强制印章不被挤压变形 */
-      background: rgba(255,255,255,0.02);
-    }
-    
-    /* 针对特别小的手机屏幕，微调按钮以确保左右同行 */
     @media (max-width: 400px) {
       .btn-wechat { padding: 10px 15px; font-size: 0.9rem; }
-      .sold-stamp-inline { transform: rotate(-8deg) scale(0.9); }
+      .sold-stamp-inline { transform: rotate(-5deg) scale(0.9); }
     }
     
     /* ===== 详情图列表 ===== */
@@ -233,7 +243,7 @@
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
     // ─────────────────────────────────────────
-    // 极简 Markdown 渲染器 (修复粗体不生效与解析问题)
+    // 重写极简 Markdown 渲染器 (绝对确保粗体生效)
     // ─────────────────────────────────────────
     function renderMarkdown(md) {
       const lines = md.split('\n');
@@ -245,14 +255,19 @@
         if (inOl) { html += '</ol>'; inOl = false; }
       };
       
-      const inline = (str) => str
-        .replace(/!\[.*?\]\(.*?\)/g, '')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        // 修复：同时支持 **文字** 和 __文字__ 格式的加粗
-        .replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>')
-        // 修复：同时支持 *文字* 和 _文字_ 格式的斜体
-        .replace(/(\*|_)(.*?)\1/g, '<em>$2</em>')
-        .replace(/~~(.*?)~~/g, '<del>$1</del>');
+      const inline = (str) => {
+        let s = str;
+        // 先处理图片和链接，防止内部符号被当成加粗
+        s = s.replace(/!\[.*?\]\(.*?\)/g, '');
+        s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+        // 核心修复：依次强制匹配加粗和斜体（解决之前嵌套正则失效问题）
+        s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/__(.*?)__/g, '<strong>$1</strong>');
+        s = s.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        s = s.replace(/_(.*?)_/g, '<em>$1</em>');
+        s = s.replace(/~~(.*?)~~/g, '<del>$1</del>');
+        return s;
+      };
         
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -446,7 +461,7 @@
     }
     
     // ─────────────────────────────────────────
-    // 灯箱缩放引擎 (极慢且丝滑的物理阻尼回弹)
+    // 灯箱缩放引擎 (增加强制重绘解决PC端不丝滑问题)
     // ─────────────────────────────────────────
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
@@ -460,7 +475,6 @@
     
     function setTransition(slow) {
       if (slow) {
-        // 【关键优化】：将回弹时长增加到1.2秒，并使用超平滑的阻尼贝塞尔曲线，营造极其丝滑的吸附漂浮感
         lbImg.style.transition = 'transform 1.2s cubic-bezier(0.1, 0.8, 0.1, 1)';
       } else {
         lbImg.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -576,7 +590,6 @@
       
       if (e.type === 'touchend' && e.touches.length > 0) return;
       
-      // 【修改点】：回弹触发阈值降至 0.6
       if (lbScale < 0.6) {
         lbScale = 1;
         currentX = 0;
@@ -597,11 +610,18 @@
       hasMoved = false;
     });
     
-    // 滚轮缩放同步调整动画
+    // 电脑端滚轮：加入强制重绘机制，彻底解决动画被跳过导致的不丝滑
     lightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
       lbImg.style.transition = 'none';
-      lbScale += e.deltaY * -0.003;
+      
+      // 优化电脑端手感：小于1时增加阻力，防止一下子缩太小
+      if (lbScale < 1) {
+        lbScale += e.deltaY * -0.001;
+      } else {
+        lbScale += e.deltaY * -0.003;
+      }
+      
       lbScale = Math.max(0.3, Math.min(lbScale, 5));
       
       if (lbScale < 1) {
@@ -612,13 +632,17 @@
       
       clearTimeout(window.wheelTimeout);
       window.wheelTimeout = setTimeout(() => {
-        // 电脑端触发同样设为 0.6，并执行极慢阻尼回弹
         if (lbScale < 0.6) {
-          lbScale = 1; currentX = 0; currentY = 0;
+          lbScale = 1; 
+          currentX = 0; 
+          currentY = 0;
+          // 核心黑科技：强迫浏览器在改变 transition 之前计算上一帧的状态
+          void lbImg.offsetWidth;
+          
           setTransition(true);
           updateTransform();
         }
-      }, 180);
+      }, 150);
     }, { passive: false });
     
     // ─────────────────────────────────────────
