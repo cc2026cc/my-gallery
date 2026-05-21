@@ -65,45 +65,33 @@
     .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
     
-    /* ===== 详情页 Hero (重构：强制宽度占满、不裁切、自适应高度) ===== */
+    /* ===== 详情页 Hero ===== */
     .detail-hero-wrapper { 
-      position: relative; 
-      width: 100%; 
-      height: auto; /* 高度完全由图片决定，像紧身衣一样贴合 */
-      background: #000; 
-      font-size: 0; line-height: 0; /* 彻底清除底部幽灵缝隙 */
-      display: block;
+      position: relative; width: 100%; height: auto; background: #000; 
+      font-size: 0; line-height: 0; display: block;
     }
     .detail-hero-wrapper img { 
-      width: 100%; /* 宽度强行拉满屏幕 */
-      height: auto; /* 维持原生比例，绝不裁切 */
-      display: block; 
-      opacity: 0.95; 
-      cursor: zoom-in; 
+      width: 100%; height: auto; display: block; 
+      opacity: 0.95; cursor: zoom-in; 
     }
     
-    /* ===== 接入独立透明 PNG 印章 ===== */
+    /* ===== 独立透明 PNG 印章 (适配手机端缩小) ===== */
     img.sold-stamp-hero {
       position: absolute; top: 30px; right: 30px;
-      width: 75px; height: auto; 
+      width: 80px; height: auto; 
       transform: rotate(-6deg);
       opacity: 0.95; pointer-events: none;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
       z-index: 5;
     }
-    
-    img.sold-stamp-inline {
-      width: 55px; height: auto; 
-      vertical-align: middle; margin-left: 15px;
-      transform: rotate(-6deg);
-      pointer-events: none; flex-shrink: 0;
-      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+    @media (max-width: 768px) {
+      /* 手机端缩小印章并调整边距，使其显得精致不突兀 */
+      img.sold-stamp-hero { width: 55px; top: 20px; right: 20px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); }
     }
     
-    /* ===== 详情文字卡片 (高级毛玻璃悬浮重叠) ===== */
+    /* ===== 详情文字卡片 ===== */
     .detail-text-card { 
       position: relative; max-width: 800px; 
-      /* -100px 保证卡片硬生生地压在首图的底部 100px 区域上 */
       margin: -100px auto 40px auto; 
       background: rgba(30, 30, 30, 0.75); 
       backdrop-filter: blur(15px);
@@ -141,14 +129,27 @@
     
     .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: 'Noto Serif SC', serif; }
     
-    /* ===== 按钮区域及印章 ===== */
+    /* ===== 按钮区域逻辑优化 ===== */
     .btn-row { display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; flex-wrap: nowrap; gap: 15px; }
-    .btn-wechat { padding: 12px 25px; background-color: var(--accent-color); color: #121212; font-weight: 600; border-radius: 2px; cursor: pointer; transition: background 0.3s; white-space: nowrap; }
+    
+    /* 正常按钮：强烈的销售结缘属性 */
+    .btn-wechat { 
+      padding: 12px 25px; background-color: var(--accent-color); color: #121212; 
+      font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; 
+    }
     .btn-wechat:hover { background-color: #e5b686; }
+    
+    /* 已结缘按钮：低调的交流属性，变为线框样式 */
+    .btn-sold-status {
+      background-color: transparent; color: var(--accent-color);
+      border: 1px solid var(--accent-color); opacity: 0.85;
+    }
+    .btn-sold-status:hover {
+      background-color: rgba(212, 163, 115, 0.1); opacity: 1;
+    }
     
     @media (max-width: 400px) {
       .btn-wechat { padding: 10px 15px; font-size: 0.9rem; }
-      img.sold-stamp-inline { width: 45px; margin-left: 10px; }
     }
     
     /* ===== 详情图列表与底部标识 ===== */
@@ -215,8 +216,9 @@
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
-    // 【核心修复】：精确指向 products 文件夹下的 yinzhang.png
-    const stampCDNUrl = `${rawBase}/yinzhang.png`;
+    const rootRawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main`;
+    const stampFilename = 'yinzhang.png';
+    const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
 
     function renderMarkdown(md) {
       const lines = md.split('\n');
@@ -404,9 +406,16 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 注入图片，降级机制调整为相对路径 fallback
+      // 首图印章
       const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
-      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-inline" alt="已结缘">` : '';
+      
+      // 【产品逻辑化解】：动态生成按钮。如果已售出，按钮变为低调的“交流”样式，且不再显示旁边的印章。
+      let wechatBtnHTML = '';
+      if (isSold) {
+        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已被藏家结缘 · 交流请加微信</div>`;
+      } else {
+        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>`;
+      }
       
       const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
       let restImgsHTML = '';
@@ -425,8 +434,7 @@
             <h2 class="serif main-title">${escapeHtml(docTitle)}</h2>
             ${bodyHTML}
             <div class="btn-row">
-              <div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>
-              ${stampInline}
+              ${wechatBtnHTML}
             </div>
           </div>
           <div class="detail-images-list">${restImgsHTML}</div>
