@@ -65,13 +65,16 @@
     .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
     
-    /* ===== 详情页 Hero (修改为全貌展示) ===== */
+    /* ===== 详情页 Hero (核心修复：完美高度自适应容器) ===== */
     .detail-hero-wrapper { 
-      position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; 
-      display: flex; align-items: center; justify-content: center;
+      position: relative; width: 100%; background: #000; text-align: center; 
+      /* font-size和line-height设为0，彻底消除底部幽灵间隙 */
+      font-size: 0; line-height: 0; 
     }
-    /* 核心修改：改为 contain，不放大、不裁剪，展示完整产品 */
-    .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: contain; opacity: 0.95; cursor: zoom-in; display: block; }
+    .detail-hero-wrapper img { 
+      width: auto; height: auto; max-width: 100%; max-height: 70vh; 
+      display: inline-block; opacity: 0.95; cursor: zoom-in; 
+    }
     
     /* ===== 接入独立透明 PNG 印章 ===== */
     img.sold-stamp-hero {
@@ -90,21 +93,20 @@
       filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
     }
     
-    /* ===== 详情文字卡片 (加入高级毛玻璃质感) ===== */
+    /* ===== 详情文字卡片 (加入高级毛玻璃悬浮重叠) ===== */
     .detail-text-card { 
-      position: relative; max-width: 800px; margin: -80px auto 40px auto; 
-      /* 半透明底色 + 背景模糊滤镜 */
+      position: relative; max-width: 800px; 
+      /* 这里控制交叠的深度 */
+      margin: -60px auto 40px auto; 
       background: rgba(30, 30, 30, 0.75); 
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
       padding: 40px; border-radius: 8px; 
       box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10; 
-      /* 添加微弱的边框反光，增加玻璃厚度感 */
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
     @media (max-width: 768px) { 
-      .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } 
-      .detail-hero-wrapper { height: 50vh; }
+      .detail-text-card { margin: -40px 15px 30px 15px; padding: 25px; } 
     }
     .detail-text-card h2.main-title { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
@@ -146,7 +148,6 @@
     .detail-images-list { max-width: 800px; margin: 0 auto; padding: 0 20px 0 20px; display: block; }
     .detail-images-list img { width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; display: block; }
     
-    /* 东方美学：内容到底标识 */
     .end-of-content {
       text-align: center; padding: 10px 0 60px 0; color: var(--text-light);
       font-family: 'Noto Serif SC', serif; font-size: 0.9rem; letter-spacing: 3px;
@@ -207,9 +208,10 @@
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
-    // 【核心修复】：为外部资源统一生成 CDN 路径，完美解决中文命名印章的读取问题
+    // 【修改为严格的文件名，并且不会有特殊字符】：请一定要保证你库里的图片名是 yinzhang.png
     const rootRawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main`;
-    const stampCDNUrl = `${rootRawBase}/${encodeURIComponent('印章.png')}`;
+    const stampFilename = 'yinzhang.png';
+    const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
 
     function renderMarkdown(md) {
       const lines = md.split('\n');
@@ -397,9 +399,10 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 【核心修复】：印章图片统一走 CDN，并增加 onerror 原生降级保障
-      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.src='印章.png'" class="sold-stamp-hero" alt="已结缘">` : '';
-      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.src='印章.png'" class="sold-stamp-inline" alt="已结缘">` : '';
+      // 【核心修复】：移除了会引起死循环无限闪烁的错误 onerror 逻辑。
+      // onerror 里面加了 this.onerror=null 保证如果连本地文件都找不到，也不再循环报错，安静降级。
+      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='${stampFilename}';" class="sold-stamp-hero" alt="已结缘">` : '';
+      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='${stampFilename}';" class="sold-stamp-inline" alt="已结缘">` : '';
       
       const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
       let restImgsHTML = '';
