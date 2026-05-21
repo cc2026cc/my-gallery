@@ -65,15 +65,21 @@
     .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
     
-    /* ===== 详情页 Hero (核心修复：完美高度自适应容器) ===== */
+    /* ===== 详情页 Hero (重构：强制宽度占满、不裁切、自适应高度) ===== */
     .detail-hero-wrapper { 
-      position: relative; width: 100%; background: #000; text-align: center; 
-      /* font-size和line-height设为0，彻底消除底部幽灵间隙 */
-      font-size: 0; line-height: 0; 
+      position: relative; 
+      width: 100%; 
+      height: auto; /* 高度完全由图片决定，像紧身衣一样贴合 */
+      background: #000; 
+      font-size: 0; line-height: 0; /* 彻底清除底部幽灵缝隙 */
+      display: block;
     }
     .detail-hero-wrapper img { 
-      width: auto; height: auto; max-width: 100%; max-height: 70vh; 
-      display: inline-block; opacity: 0.95; cursor: zoom-in; 
+      width: 100%; /* 宽度强行拉满屏幕 */
+      height: auto; /* 维持原生比例，绝不裁切 */
+      display: block; 
+      opacity: 0.95; 
+      cursor: zoom-in; 
     }
     
     /* ===== 接入独立透明 PNG 印章 ===== */
@@ -83,6 +89,7 @@
       transform: rotate(-6deg);
       opacity: 0.95; pointer-events: none;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+      z-index: 5;
     }
     
     img.sold-stamp-inline {
@@ -93,11 +100,11 @@
       filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
     }
     
-    /* ===== 详情文字卡片 (加入高级毛玻璃悬浮重叠) ===== */
+    /* ===== 详情文字卡片 (高级毛玻璃悬浮重叠) ===== */
     .detail-text-card { 
       position: relative; max-width: 800px; 
-      /* 这里控制交叠的深度 */
-      margin: -60px auto 40px auto; 
+      /* -100px 保证卡片硬生生地压在首图的底部 100px 区域上 */
+      margin: -100px auto 40px auto; 
       background: rgba(30, 30, 30, 0.75); 
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
@@ -106,7 +113,7 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
     @media (max-width: 768px) { 
-      .detail-text-card { margin: -40px 15px 30px 15px; padding: 25px; } 
+      .detail-text-card { margin: -60px 15px 30px 15px; padding: 25px; } 
     }
     .detail-text-card h2.main-title { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
@@ -208,10 +215,8 @@
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
-    // 【修改为严格的文件名，并且不会有特殊字符】：请一定要保证你库里的图片名是 yinzhang.png
-    const rootRawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main`;
-    const stampFilename = 'yinzhang.png';
-    const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
+    // 【核心修复】：精确指向 products 文件夹下的 yinzhang.png
+    const stampCDNUrl = `${rawBase}/yinzhang.png`;
 
     function renderMarkdown(md) {
       const lines = md.split('\n');
@@ -399,10 +404,9 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 【核心修复】：移除了会引起死循环无限闪烁的错误 onerror 逻辑。
-      // onerror 里面加了 this.onerror=null 保证如果连本地文件都找不到，也不再循环报错，安静降级。
-      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='${stampFilename}';" class="sold-stamp-hero" alt="已结缘">` : '';
-      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='${stampFilename}';" class="sold-stamp-inline" alt="已结缘">` : '';
+      // 注入图片，降级机制调整为相对路径 fallback
+      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
+      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-inline" alt="已结缘">` : '';
       
       const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
       let restImgsHTML = '';
