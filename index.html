@@ -75,20 +75,22 @@
       opacity: 0.95; cursor: zoom-in; 
     }
     
-    /* ===== 独立透明 PNG 印章 (缩小为原版 1/3) ===== */
+    /* ===== 独立透明 PNG 印章 ===== */
     img.sold-stamp-hero {
       position: absolute; top: 30px; right: 30px;
-      width: 25px; height: auto; /* 缩小至原 75px 的 1/3 */
+      /* 电脑端大小 50px */
+      width: 50px; height: auto; 
       transform: rotate(-6deg);
-      opacity: 0.95; pointer-events: none;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+      /* 恢复100%原图颜色 */
+      opacity: 1; pointer-events: none;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
       z-index: 5;
     }
     @media (max-width: 768px) {
       img.sold-stamp-hero { 
-        width: 18px; /* 缩小至原 55px 的 1/3 */
+        /* 手机端大小 30px */
+        width: 30px; 
         top: 20px; right: 20px; 
-        filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4)); 
       }
     }
     
@@ -142,10 +144,17 @@
     }
     .btn-wechat:hover { background-color: #e5b686; }
     
-    /* 已结缘按钮：低调的交流属性，变为线框样式 */
+    /* 已结缘按钮：缩小体积 + 中式双线典雅边框 */
     .btn-sold-status {
-      background-color: transparent; color: var(--accent-color);
-      border: 1px solid var(--accent-color); opacity: 0.85;
+      padding: 6px 18px; /* 内边距缩小，让整个框更精巧 */
+      font-size: 0.95rem; /* 字号略微减小 */
+      background-color: transparent; 
+      color: var(--accent-color);
+      /* 核心设计：双线框打断单调直线，配合圆角 */
+      border: 3px double var(--accent-color); 
+      border-radius: 6px; 
+      opacity: 0.9;
+      letter-spacing: 1px; /* 字距稍微拉开，增加呼吸感 */
     }
     .btn-sold-status:hover {
       background-color: rgba(212, 163, 115, 0.1); opacity: 1;
@@ -153,6 +162,8 @@
     
     @media (max-width: 400px) {
       .btn-wechat { padding: 10px 15px; font-size: 0.9rem; }
+      /* 手机端进一步缩已结缘小按钮 */
+      .btn-sold-status { padding: 5px 14px; font-size: 0.85rem; }
     }
     
     /* ===== 详情图列表与底部标识 ===== */
@@ -413,8 +424,10 @@
       
       let wechatBtnHTML = '';
       if (isSold) {
+        // 微信号改为大写 CJQ678
         wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已结缘·交流加微信CJQ678</div>`;
       } else {
+        // 微信号改为大写 CJQ678
         wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
       }
       
@@ -617,7 +630,7 @@
     }, { passive: false });
     
     // ─────────────────────────────────────────
-    // 复制微信号 (字母全大写)
+    // 复制微信号 (统一字母大写)
     // ─────────────────────────────────────────
     function copyWechat() {
       const wechatId = "CJQ678";
