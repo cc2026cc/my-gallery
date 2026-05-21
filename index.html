@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
   
-  <!-- 【核心黑科技】：彻底消灭刷新闪现的拦截器 -->
+  <!-- 拦截脚本：彻底消灭刷新闪现 FOUC -->
   <script>
     if (window.location.hash.substring(1)) {
       document.write('<style id="hide-home-style">.hero, .container, footer { display: none !important; }</style>');
@@ -65,31 +65,47 @@
     .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
     
-    /* ===== 详情页 Hero ===== */
-    .detail-hero-wrapper { position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; }
-    .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; cursor: zoom-in; display: block; }
+    /* ===== 详情页 Hero (修改为全貌展示) ===== */
+    .detail-hero-wrapper { 
+      position: relative; width: 100%; height: 60vh; background: #000; overflow: hidden; 
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* 核心修改：改为 contain，不放大、不裁剪，展示完整产品 */
+    .detail-hero-wrapper img { width: 100%; height: 100%; object-fit: contain; opacity: 0.95; cursor: zoom-in; display: block; }
     
     /* ===== 接入独立透明 PNG 印章 ===== */
     img.sold-stamp-hero {
       position: absolute; top: 30px; right: 30px;
-      width: 75px; height: auto; /* 控制主图印章大小 */
+      width: 75px; height: auto; 
       transform: rotate(-6deg);
       opacity: 0.95; pointer-events: none;
-      /* 为PNG图片增加一层淡淡的真实物理投影 */
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
     }
     
     img.sold-stamp-inline {
-      width: 55px; height: auto; /* 控制按钮旁印章大小 */
+      width: 55px; height: auto; 
       vertical-align: middle; margin-left: 15px;
       transform: rotate(-6deg);
       pointer-events: none; flex-shrink: 0;
       filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
     }
     
-    /* ===== 详情文字卡片 ===== */
-    .detail-text-card { position: relative; max-width: 800px; margin: -80px auto 40px auto; background: var(--card-bg); padding: 40px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10; }
-    @media (max-width: 768px) { .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } }
+    /* ===== 详情文字卡片 (加入高级毛玻璃质感) ===== */
+    .detail-text-card { 
+      position: relative; max-width: 800px; margin: -80px auto 40px auto; 
+      /* 半透明底色 + 背景模糊滤镜 */
+      background: rgba(30, 30, 30, 0.75); 
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 40px; border-radius: 8px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 10; 
+      /* 添加微弱的边框反光，增加玻璃厚度感 */
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    @media (max-width: 768px) { 
+      .detail-text-card { margin: -50px 15px 30px 15px; padding: 25px; } 
+      .detail-hero-wrapper { height: 50vh; }
+    }
     .detail-text-card h2.main-title { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
     /* ===== Markdown 顶级中文排印标准 ===== */
@@ -132,24 +148,13 @@
     
     /* 东方美学：内容到底标识 */
     .end-of-content {
-      text-align: center;
-      padding: 10px 0 60px 0;
-      color: var(--text-light);
-      font-family: 'Noto Serif SC', serif;
-      font-size: 0.9rem;
-      letter-spacing: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.5;
+      text-align: center; padding: 10px 0 60px 0; color: var(--text-light);
+      font-family: 'Noto Serif SC', serif; font-size: 0.9rem; letter-spacing: 3px;
+      display: flex; align-items: center; justify-content: center; opacity: 0.5;
     }
     .end-of-content::before, .end-of-content::after {
-      content: "";
-      height: 1px;
-      width: 50px;
-      background: var(--text-light);
-      margin: 0 15px;
-      opacity: 0.2;
+      content: ""; height: 1px; width: 50px; background: var(--text-light);
+      margin: 0 15px; opacity: 0.2;
     }
     
     /* ===== Lightbox ===== */
@@ -202,6 +207,10 @@
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
     const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
+    // 【核心修复】：为外部资源统一生成 CDN 路径，完美解决中文命名印章的读取问题
+    const rootRawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main`;
+    const stampCDNUrl = `${rootRawBase}/${encodeURIComponent('印章.png')}`;
+
     function renderMarkdown(md) {
       const lines = md.split('\n');
       let html = '';
@@ -388,9 +397,9 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 【接入专属PNG图片印章】：自动读取与 index.html 同目录的 印章.png
-      const stampHero = isSold ? `<img src="印章.png" class="sold-stamp-hero" alt="已结缘">` : '';
-      const stampInline = isSold ? `<img src="印章.png" class="sold-stamp-inline" alt="已结缘">` : '';
+      // 【核心修复】：印章图片统一走 CDN，并增加 onerror 原生降级保障
+      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.src='印章.png'" class="sold-stamp-hero" alt="已结缘">` : '';
+      const stampInline = isSold ? `<img src="${stampCDNUrl}" onerror="this.src='印章.png'" class="sold-stamp-inline" alt="已结缘">` : '';
       
       const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
       let restImgsHTML = '';
@@ -423,7 +432,6 @@
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     
-    // 【核心修复】：关闭弹窗时，解除首页的隐藏屏蔽
     function closeModal() {
       document.getElementById('product-modal').style.display = 'none';
       document.body.style.overflow = 'auto';
@@ -436,7 +444,6 @@
       }
     }
     
-    // 【核心修复】：手机回退时，解除首页的隐藏屏蔽
     window.addEventListener('popstate', () => {
       const hash = decodeURIComponent(window.location.hash.substring(1));
       if (hash) {
