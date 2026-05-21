@@ -75,18 +75,21 @@
       opacity: 0.95; cursor: zoom-in; 
     }
     
-    /* ===== 独立透明 PNG 印章 (适配手机端缩小) ===== */
+    /* ===== 独立透明 PNG 印章 (缩小为原版 1/3) ===== */
     img.sold-stamp-hero {
       position: absolute; top: 30px; right: 30px;
-      width: 80px; height: auto; 
+      width: 25px; height: auto; /* 缩小至原 75px 的 1/3 */
       transform: rotate(-6deg);
       opacity: 0.95; pointer-events: none;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
       z-index: 5;
     }
     @media (max-width: 768px) {
-      /* 手机端缩小印章并调整边距，使其显得精致不突兀 */
-      img.sold-stamp-hero { width: 55px; top: 20px; right: 20px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); }
+      img.sold-stamp-hero { 
+        width: 18px; /* 缩小至原 55px 的 1/3 */
+        top: 20px; right: 20px; 
+        filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4)); 
+      }
     }
     
     /* ===== 详情文字卡片 ===== */
@@ -406,15 +409,13 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 首图印章
       const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
       
-      // 【产品逻辑化解】：动态生成按钮。如果已售出，按钮变为低调的“交流”样式，且不再显示旁边的印章。
       let wechatBtnHTML = '';
       if (isSold) {
-        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已被藏家结缘 · 交流请加微信</div>`;
+        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已结缘·交流加微信CJQ678</div>`;
       } else {
-        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 cjq678)</div>`;
+        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
       }
       
       const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
@@ -478,7 +479,7 @@
     });
     
     // ─────────────────────────────────────────
-    // 终极灯箱缩放引擎 (绝对缓慢阻尼回弹)
+    // 终极灯箱缩放引擎
     // ─────────────────────────────────────────
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
@@ -616,13 +617,13 @@
     }, { passive: false });
     
     // ─────────────────────────────────────────
-    // 复制微信号
+    // 复制微信号 (字母全大写)
     // ─────────────────────────────────────────
     function copyWechat() {
-      const wechatId = "cjq678";
+      const wechatId = "CJQ678";
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(wechatId)
-          .then(() => { alert("微信号 cjq678 已复制！"); })
+          .then(() => { alert("微信号 CJQ678 已复制！"); })
           .catch(() => { fallbackCopyTextToClipboard(wechatId); });
       } else {
         fallbackCopyTextToClipboard(wechatId);
@@ -633,8 +634,8 @@
       const textArea = document.createElement("textarea");
       textArea.value = text; textArea.style.position = "fixed";
       document.body.appendChild(textArea); textArea.focus(); textArea.select();
-      try { document.execCommand('copy'); alert("微信号 cjq678 已复制！"); } 
-      catch (err) { alert("请手动输入：cjq678"); }
+      try { document.execCommand('copy'); alert("微信号 CJQ678 已复制！"); } 
+      catch (err) { alert("请手动输入：CJQ678"); }
       document.body.removeChild(textArea);
     }
     
