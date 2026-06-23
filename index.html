@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
   
-  <!-- 拦截脚本：彻底消灭刷新闪现 FOUC -->
   <script>
     if (window.location.hash.substring(1)) {
       document.write('<style id="hide-home-style">.hero, .container, footer { display: none !important; }</style>');
@@ -228,9 +227,11 @@
     const GITHUB_USERNAME = "cc2026cc";
     const REPO_NAME = "my-gallery";
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
-    const rawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/products`;
     
-    const rootRawBase = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main`;
+    // 【修改点 1】摒弃 jsdelivr，直接使用标准的 GitHub Raw 原始资源路径
+    const rawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/products`;
+    
+    const rootRawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main`;
     const stampFilename = 'yinzhang.png';
     const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
 
@@ -334,8 +335,10 @@
           });
           
           images.sort();
+          
+          // 【修改点 2】首页封面图加上时间戳后缀，确保随时刷新随时更新
           const coverImg = images.length > 0 
-            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}` 
+            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}` 
             : '';
             
           const cardName = folderName.includes('-') 
@@ -397,7 +400,8 @@
       
       if (infoUrl) {
         try {
-          const res = await fetch(infoUrl);
+          // 为了确保info文本也是最新的，这里同样可以追加时间戳
+          const res = await fetch(`${infoUrl}?t=${new Date().getTime()}`);
           const buffer = await res.arrayBuffer();
           const text = new TextDecoder('utf-8').decode(buffer);
           
@@ -420,21 +424,23 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      const stampHero = isSold ? `<img src="${stampCDNUrl}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
+      // 【修改点 3】已结缘印章加上时间戳后缀
+      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${new Date().getTime()}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
       
       let wechatBtnHTML = '';
       if (isSold) {
-        // 微信号改为大写 CJQ678
         wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已结缘·交流加微信CJQ678</div>`;
       } else {
-        // 微信号改为大写 CJQ678
         wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
       }
       
-      const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}`;
+      // 【修改点 4】详情页首图加上缓存爆破时间戳
+      const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}`;
+      
+      // 【修改点 5】详情页后面的列表图同样严格追加时间戳，彻底断绝旧图缓存
       let restImgsHTML = '';
       for (let i = 1; i < images.length; i++) {
-        const src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}`;
+        const src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${new Date().getTime()}`;
         restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
       }
       
