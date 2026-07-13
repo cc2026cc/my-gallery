@@ -319,13 +319,23 @@
           const files = await folderRes.json();
           
           let images = [];
+          let thumbImage = null; // 新增：单独存储作为缩略图的文件名
           let infoUrl = '';
           let infoType = '';
           
           files.forEach(file => {
             const ext = file.name.split('.').pop().toLowerCase();
-            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-              images.push(file.name);
+            // 提取无后缀名的文件名，方便进行 thumb 判断
+            const baseName = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase();
+            
+            // 扩充了常见的图片格式
+            if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'].includes(ext)) {
+              // 如果文件名末尾是 thumb（例如 thumb, -thumb, _thumb 等等）
+              if (baseName.endsWith('thumb')) {
+                thumbImage = file.name;
+              } else {
+                images.push(file.name); // 只有非缩略图才会推入详情列表
+              }
             } else if (ext === 'md' || ext === 'txt') {
               if (ext === 'md' || infoType === '') {
                 infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
@@ -336,9 +346,11 @@
           
           images.sort();
           
-          // 【修改点 2】首页封面图加上时间戳后缀，确保随时刷新随时更新
-          const coverImg = images.length > 0 
-            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}` 
+          // 封面图逻辑：优先使用查找到的 thumb 文件，如果没有则降级使用第一张详情图（防报错）
+          const coverFileName = thumbImage ? thumbImage : (images.length > 0 ? images[0] : null);
+            
+          const coverImg = coverFileName 
+            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(coverFileName)}?t=${new Date().getTime()}` 
             : '';
             
           const cardName = folderName.includes('-') 
@@ -346,6 +358,7 @@
             : folderName;
             
           if (coverImg) {
+            // 注意：此时传入的 images 数组已经排除了 thumbImage，缩略图不会出现在详情页
             createCard(folderName, cardName, coverImg, images, infoUrl, infoType);
           }
         }
@@ -435,8 +448,14 @@
       }
       
       // 【修改点 4】详情页首图加上缓存爆破时间戳
-      const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}`;
+      // 加入了防御性判断，防止某个产品只放了 thumb 缩略图而没有详情图时报错卡死
+      const firstImgSrc = images.length > 0 ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}` : '';
       
+      // 构建详情首图 Wrapper（根据是否有详情图智能渲染）
+      const heroWrapperHTML = firstImgSrc 
+        ? `<div class="detail-hero-wrapper"><img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">${stampHero}</div>`
+        : (stampHero ? `<div class="detail-hero-wrapper" style="min-height: 100px;">${stampHero}</div>` : '');
+
       // 【修改点 5】详情页后面的列表图同样严格追加时间戳，彻底断绝旧图缓存
       let restImgsHTML = '';
       for (let i = 1; i < images.length; i++) {
@@ -446,10 +465,7 @@
       
       dynamicBox.innerHTML = `
         <div class="modal-content-dynamic">
-          <div class="detail-hero-wrapper">
-            <img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">
-            ${stampHero}
-          </div>
+          ${heroWrapperHTML}
           <div class="detail-text-card">
             <h2 class="serif main-title">${escapeHtml(docTitle)}</h2>
             ${bodyHTML}
