@@ -145,15 +145,14 @@
     
     /* 已结缘按钮：缩小体积 + 中式双线典雅边框 */
     .btn-sold-status {
-      padding: 6px 18px; /* 内边距缩小，让整个框更精巧 */
-      font-size: 0.95rem; /* 字号略微减小 */
+      padding: 6px 18px; 
+      font-size: 0.95rem; 
       background-color: transparent; 
       color: var(--accent-color);
-      /* 核心设计：双线框打断单调直线，配合圆角 */
       border: 3px double var(--accent-color); 
       border-radius: 6px; 
       opacity: 0.9;
-      letter-spacing: 1px; /* 字距稍微拉开，增加呼吸感 */
+      letter-spacing: 1px;
     }
     .btn-sold-status:hover {
       background-color: rgba(212, 163, 115, 0.1); opacity: 1;
@@ -161,7 +160,6 @@
     
     @media (max-width: 400px) {
       .btn-wechat { padding: 10px 15px; font-size: 0.9rem; }
-      /* 手机端进一步缩已结缘小按钮 */
       .btn-sold-status { padding: 5px 14px; font-size: 0.85rem; }
     }
     
@@ -227,13 +225,41 @@
     const GITHUB_USERNAME = "cc2026cc";
     const REPO_NAME = "my-gallery";
     const apiBase = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/products`;
-    
-    // 【修改点 1】摒弃 jsdelivr，直接使用标准的 GitHub Raw 原始资源路径
     const rawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/products`;
-    
     const rootRawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main`;
     const stampFilename = 'yinzhang.png';
     const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
+
+    // ─────────────────────────────────────────
+    // 核心智能预加载引擎与缓存控制
+    // ─────────────────────────────────────────
+    // 使用单一会话时间戳，保证页面刷新时获取最新内容，但在同一次访问中各预加载组件能够共享缓存，避免重复请求带宽浪费
+    const CACHE_STAMP = new Date().getTime(); 
+    const preloadedImagesCache = new Set();
+    
+    function preloadImage(url) {
+      if (!url || preloadedImagesCache.has(url)) return;
+      preloadedImagesCache.add(url);
+      const img = new Image();
+      img.src = url;
+    }
+
+    // 交叉观察器：当产品卡片因滑动即将进入视口时，预加载该产品详情页的第一张大图
+    const galleryPreloadObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const card = entry.target;
+          const folder = card.dataset.folder;
+          const firstImg = card.dataset.firstImage;
+          if (folder && firstImg) {
+            const url = `${rawBase}/${encodeURIComponent(folder)}/${encodeURIComponent(firstImg)}?t=${CACHE_STAMP}`;
+            // 延迟 500ms 执行，确保优先加载当前页面的缩略图，不抢占资源
+            setTimeout(() => preloadImage(url), 500);
+          }
+          observer.unobserve(card); // 每张卡片只触发一次预加载
+        }
+      });
+    }, { rootMargin: '300px 0px' }); // 距离视口 300px 时触发
 
     function renderMarkdown(md) {
       const lines = md.split('\n');
@@ -321,11 +347,18 @@
           let images = [];
           let infoUrl = '';
           let infoType = '';
+          let thumbFilename = ''; // 用于存放特定的缩略图
           
           files.forEach(file => {
             const ext = file.name.split('.').pop().toLowerCase();
-            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-              images.push(file.name);
+            if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+              // 精准识别带有 thumb 结尾的文件
+              const nameNoExt = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase();
+              if (nameNoExt.endsWith('thumb')) {
+                thumbFilename = file.name; // 提取为缩略图
+              } else {
+                images.push(file.name); // 其他图片推入详情页数组（剥离缩略图）
+              }
             } else if (ext === 'md' || ext === 'txt') {
               if (ext === 'md' || infoType === '') {
                 infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
@@ -336,9 +369,14 @@
           
           images.sort();
           
-          // 【修改点 2】首页封面图加上时间戳后缀，确保随时刷新随时更新
-          const coverImg = images.length > 0 
-            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}` 
+          // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
+          let finalThumb = thumbFilename;
+          if (!finalThumb && images.length > 0) {
+            finalThumb = images[0]; 
+          }
+            
+          const coverImg = finalThumb 
+            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(finalThumb)}?t=${CACHE_STAMP}` 
             : '';
             
           const cardName = folderName.includes('-') 
@@ -374,11 +412,26 @@
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
       card.className = 'product-card';
-      card.setAttribute('data-folder', folderName);
+      
       card.innerHTML = `
         <img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">
         <div class="product-info"><h3 class="serif">${cardName}</h3></div>
       `;
+      
+      // 绑定滑动进入屏幕预加载
+      if (allImages && allImages.length > 0) {
+        card.dataset.folder = folderName;
+        card.dataset.firstImage = allImages[0];
+        galleryPreloadObserver.observe(card);
+
+        // 绑定鼠标悬停或触碰预加载（意图预判：此时用户极可能马上点击）
+        const prefetchIntent = () => {
+          preloadImage(`${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(allImages[0])}?t=${CACHE_STAMP}`);
+        };
+        card.addEventListener('mouseenter', prefetchIntent, {once: true});
+        card.addEventListener('touchstart', prefetchIntent, {once: true, passive: true});
+      }
+
       card.onclick = () => openModal(folderName, cardName, allImages, infoUrl, infoType);
       gallery.appendChild(card);
     }
@@ -400,8 +453,7 @@
       
       if (infoUrl) {
         try {
-          // 为了确保info文本也是最新的，这里同样可以追加时间戳
-          const res = await fetch(`${infoUrl}?t=${new Date().getTime()}`);
+          const res = await fetch(`${infoUrl}?t=${CACHE_STAMP}`);
           const buffer = await res.arrayBuffer();
           const text = new TextDecoder('utf-8').decode(buffer);
           
@@ -424,8 +476,7 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      // 【修改点 3】已结缘印章加上时间戳后缀
-      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${new Date().getTime()}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
+      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
       
       let wechatBtnHTML = '';
       if (isSold) {
@@ -434,20 +485,18 @@
         wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
       }
       
-      // 【修改点 4】详情页首图加上缓存爆破时间戳
-      const firstImgSrc = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${new Date().getTime()}`;
+      const firstImgSrc = images.length > 0 ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
       
-      // 【修改点 5】详情页后面的列表图同样严格追加时间戳，彻底断绝旧图缓存
       let restImgsHTML = '';
       for (let i = 1; i < images.length; i++) {
-        const src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${new Date().getTime()}`;
+        const src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
         restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
       }
       
       dynamicBox.innerHTML = `
         <div class="modal-content-dynamic">
           <div class="detail-hero-wrapper">
-            <img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">
+            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
             ${stampHero}
           </div>
           <div class="detail-text-card">
@@ -461,6 +510,14 @@
           <div class="end-of-content">· 观止 ·</div>
         </div>
       `;
+
+      // 当用户已经打开详情页时，后台静默将此页面的剩余图片预先拉取下来
+      // 等用户看完文字下滑时，所有图片直接从本地缓存秒渲染
+      setTimeout(() => {
+        for (let i = 1; i < images.length; i++) {
+           preloadImage(`${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
+        }
+      }, 400); 
     }
     
     function escapeHtml(str) {
