@@ -3,18 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>荣昌陶艺 · 个人作品展厅</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <title>荣昌陶 · 细陶茶器 / 粗陶花盆陶罐</title>
   <link rel="preconnect" href="https://api.github.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
   
   <script>
     if (window.location.hash.substring(1)) {
-      document.write('<style id="hide-home-style">.hero, .container, footer { display: none !important; }</style>');
+      document.write('<style id="hide-home-style">#home{display:none!important}</style>');
     }
   </script>
+  <noscript><style>.curtain,.glow,.embers{display:none}</style></noscript>
 
   <style>
     :root {
@@ -25,30 +23,100 @@
       --text-body: #d6c9b8;
       --accent-color: #d4a373;
       --border-color: #333333;
+      --gold: #d8a85e;
+      --gold-l: #eec98a;
+      --ink: #f2e8d5;
+      --serif: "Noto Serif SC","Songti SC","STSong",serif;
+      --sans: -apple-system,BlinkMacSystemFont,"PingFang SC","MiSans","Noto Sans SC","Source Han Sans SC",sans-serif;
     }
     
     body, html {
       margin: 0; padding: 0;
-      background-color: var(--bg-color);
+      background-color: #0a0908;
       color: var(--text-main);
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: var(--sans);
       scroll-behavior: smooth;
     }
     
-    h1, h2, h3, h4, h5, h6, .serif { font-family: 'Noto Serif SC', serif; font-weight: 600; }
+    h1, h2, h3, h4, h5, h6, .serif { font-family: var(--serif); font-weight: 600; }
     
-    /* ===== Hero ===== */
-    .hero { max-width: 1200px; margin: 0 auto; padding: 60px 20px 40px 20px; text-align: center; animation: fadeIn 1s ease-out; }
-    .hero-text h1 { font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 15px; }
-    .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8; }
-    .hero-image img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; border-radius: 4px; }
+    /* ===== 窑门双开 · 首页 ===== */
+    #home { position: relative; }
+    .stage { position: fixed; inset: 0; display: flex; flex-direction: column; --px: 0; --py: 0; }
+    .door { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; cursor: pointer; transition: flex-grow .45s cubic-bezier(.22,.8,.24,1); text-decoration: none; color: inherit; }
+    .door-tea { flex: 1.35; }
+    .door-clay { flex: 1; background: #1a0f08; align-items: flex-end; }
+    .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: translate3d(calc(var(--px) * -12px), calc(var(--py) * -12px), 0) scale(1.02); transition: transform .35s ease-out; will-change: transform; }
+    .door:hover .door-img { transform: translate3d(calc(var(--px) * -12px), calc(var(--py) * -12px), 0) scale(1.02); }
+    .shade { position: absolute; inset: 0; }
+    .door-tea .shade { background: linear-gradient(180deg, rgba(14,10,6,.58), rgba(14,10,6,.06) 42%, rgba(14,10,6,.9)); }
+    .door-clay .shade { background: linear-gradient(180deg, rgba(30,14,5,.82), rgba(30,14,5,.28) 42%, rgba(20,9,3,.92)); }
+    .zone-body { position: relative; padding: 0 28px 13vh; max-width: 680px; width: 100%; }
+    .door-clay .zone-body { margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+    .kicker { font-size: 12px; letter-spacing: .5em; color: var(--gold); margin-bottom: 12px; }
+    .door h1 { font-size: clamp(40px, 5.6vw, 88px); font-weight: 600; letter-spacing: .1em; font-family: var(--serif); line-height: 1.15; margin: 0; }
+    .meta { margin-top: 12px; font-size: clamp(12px, 1.05vw, 14px); letter-spacing: .08em; color: rgba(242,232,213,.72); min-height: 1.4em; }
+    .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 11px 24px; border: 1px solid rgba(216,168,94,.5); border-radius: 999px; font-size: 13px; letter-spacing: .24em; color: var(--gold-l); transition: background .3s, color .3s, border-color .3s; }
+    .go svg { width: 12px; height: 12px; }
+    .door:hover .go { background: var(--gold); border-color: var(--gold); color: #1a1409; }
+    .seam { position: relative; flex: 0 0 1px; align-self: stretch; background: linear-gradient(90deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); z-index: 5; }
+    .seam i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; border-radius: 50%; background: #14100b; border: 1px solid var(--gold); display: grid; place-items: center; color: var(--gold); font-size: 13px; font-style: normal; font-family: var(--serif); }
+    .top { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(20px + env(safe-area-inset-top)) 32px 8px; z-index: 8; pointer-events: none; }
+    .top b { font-size: 19px; font-weight: 600; letter-spacing: .5em; font-family: var(--serif); }
+    .top .slogan { display: none; font-size: 11px; letter-spacing: .28em; color: rgba(242,232,213,.55); font-family: var(--serif); }
+    .top span { font-size: 12px; letter-spacing: .16em; color: var(--gold); }
+    .bot { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 32px calc(16px + env(safe-area-inset-bottom)); font-size: 11px; letter-spacing: .18em; color: rgba(242,232,213,.5); z-index: 8; pointer-events: none; }
+    .bot .side { display: none; }
+    .curtain { position: fixed; left: 0; right: 0; height: 50.8%; background: #100d0a; z-index: 20; transition: transform 1.15s cubic-bezier(.7,0,.2,1); pointer-events: auto; }
+    .curtain-l { top: 0; border-bottom: 1px solid rgba(216,168,94,.25); }
+    .curtain-r { bottom: 0; border-top: 1px solid rgba(216,168,94,.25); }
+    body.ready .curtain-l { transform: translateY(-101%); }
+    body.ready .curtain-r { transform: translateY(101%); }
+    body.ready .curtain { pointer-events: none; }
+    .glow { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 70vmax; height: 70vmax; background: radial-gradient(circle, rgba(239,159,39,.26), rgba(216,90,48,.1) 42%, transparent 70%); z-index: 19; pointer-events: none; animation: fadeGlow 1.8s ease .3s forwards; }
+    @keyframes fadeGlow { to { opacity: 0; } }
+    .embers { position: fixed; inset: 0; z-index: 21; pointer-events: none; overflow: hidden; }
+    .embers i { position: absolute; bottom: -8px; left: var(--l); width: 3px; height: 3px; border-radius: 50%; background: var(--gold-l); opacity: 0; animation: rise 1.7s ease-out var(--d) forwards; }
+    @keyframes rise { 12% { opacity: .95; } 100% { transform: translateY(-52vh) scale(.3); opacity: 0; } }
+    .door:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+    @media (max-width: 899px) {
+      .door-clay { justify-content: flex-start; }
+      .door-clay .zone-body { padding: 36px 28px 0; }
+    }
+    @media (hover: hover) {
+      .stage:has(.door-tea:hover) .door-tea { flex: 1.15; }
+      .stage:has(.door-tea:hover) .door-clay { flex: .95; }
+      .stage:has(.door-clay:hover) .door-clay { flex: 1.12; }
+      .stage:has(.door-clay:hover) .door-tea { flex: .96; }
+    }
+    @media (min-width: 900px) {
+      .stage { flex-direction: row; }
+      .seam { background: linear-gradient(180deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); }
+      .zone-body { padding: 0 6vw 15vh; }
+      .top .slogan { display: block; }
+      .bot .side { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .curtain, .glow, .embers { display: none; }
+      .door, .door-img, .go { transition: none; }
+    }
+
+    /* ===== 展厅内景（分类视图） ===== */
+    #cat-view { display: none; }
+    #cat-view.on { display: block; }
+    .cat-bar { display: flex; align-items: center; gap: 18px; margin-bottom: 30px; flex-wrap: wrap; }
+    .cat-back { background: none; border: 1px solid rgba(216,168,94,.45); color: var(--gold-l); padding: 8px 18px; border-radius: 999px; font-size: 13px; letter-spacing: .18em; cursor: pointer; font-family: var(--sans); transition: background .25s, color .25s; }
+    .cat-back:hover { background: var(--gold); color: #1a1409; border-color: var(--gold); }
+    .cat-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    .cat-title h2 { margin: 0; font-size: 1.6rem; letter-spacing: .08em; }
+    .cat-count { font-size: 12px; letter-spacing: .2em; color: var(--text-light); }
+    .cat-kicker { font-size: 11px; letter-spacing: .4em; color: var(--gold); margin: 0 0 8px 0; }
     
     /* ===== Gallery ===== */
     .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
     .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; opacity: 0; transition: opacity 1s ease-in; }
     @media (max-width: 768px) {
       .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-      .hero-text h1 { font-size: 2rem; }
     }
     
     .product-card { cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; background: var(--card-bg); padding: 8px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
@@ -110,7 +178,7 @@
     .detail-text-card h2.main-title { margin-top: 0; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: var(--text-main); }
     
     /* ===== Markdown 顶级中文排印标准 ===== */
-    .md-body { color: var(--text-body); font-size: 1.05rem; line-height: 2.1; font-family: 'Noto Serif SC', serif; font-weight: 400; margin-bottom: 30px; }
+    .md-body { color: var(--text-body); font-size: 1.05rem; line-height: 2.1; font-family: var(--serif); font-weight: 400; margin-bottom: 30px; }
     .md-body p { margin: 0 0 1.5em 0; white-space: normal; text-align: justify; text-justify: inter-character; word-break: normal; line-break: strict; }
     
     .md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 { 
@@ -131,7 +199,7 @@
     .md-body hr { border: none; border-top: 1px dashed #444; margin: 2.5em auto; width: 50%; }
     .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 1.5em 0; padding: 15px 20px; background: rgba(212, 163, 115, 0.08); border-radius: 0 4px 4px 0; color: var(--text-main); font-style: italic; text-align: justify; text-justify: inter-character; }
     
-    .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: 'Noto Serif SC', serif; }
+    .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: var(--serif); }
     
     /* ===== 按钮区域逻辑优化 ===== */
     .btn-row { display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; flex-wrap: nowrap; gap: 15px; }
@@ -190,19 +258,68 @@
 </head>
 <body>
   
-  <div class="hero">
-    <div class="hero-text">
-      <h1>荣昌陶艺</h1>
-      <p class="serif">泥火交融，凝结匠心。每一件作品，都是与时间的对话。</p>
+  <div id="home">
+    <div class="stage">
+      <a class="door door-tea" id="door-tea" href="#cat-tea">
+        <picture>
+          <source media="(min-width:900px)" srcset="assets/tea-hero-pc.jpg">
+          <img class="door-img" src="assets/tea-hero.jpg" alt="细陶茶器：茶席上的柴烧壶" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="shade"></div>
+        <div class="zone-body">
+          <p class="kicker">上篇 · 泥成器</p>
+          <h1>细陶茶器</h1>
+          <p class="meta" id="meta-tea">正从窑火中请出…</p>
+          <span class="go">进展厅 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+      <div class="seam"><i>窑</i></div>
+      <a class="door door-clay" id="door-clay" href="#cat-clay">
+        <picture>
+          <source media="(min-width:900px)" srcset="assets/clay-hero-pc.jpg">
+          <img class="door-img" src="assets/clay-hero.jpg" alt="粗陶花盆陶罐：手作国际盆" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="shade"></div>
+        <div class="zone-body">
+          <p class="kicker">下篇 · 火养土</p>
+          <h1>粗陶花盆 · 陶罐</h1>
+          <p class="meta" id="meta-clay">正从窑火中请出…</p>
+          <span class="go">进展厅 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
     </div>
-    <div class="hero-image">
-      <img src="hero.jpg" alt="荣昌陶艺" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=2000&auto=format&fit=crop'; this.onerror=null;">
+    <header class="top">
+      <b>荣昌陶</b>
+      <span class="slogan">泥火交融，凝结匠心 · 每一件作品，都是与时间的对话</span>
+      <span>结缘 · CJQ678</span>
+    </header>
+    <footer class="bot">
+      <span class="side">荣昌陶个人作品展厅</span>
+      <span class="mid">© 2026 · 仅作陈列展示 · 不收集个人信息</span>
+      <span class="side">细陶茶器 / 粗陶花盆陶罐</span>
+    </footer>
+    <div class="glow"></div>
+    <div class="embers">
+      <i style="--l:20%;--d:.05s"></i><i style="--l:28%;--d:.18s"></i><i style="--l:36%;--d:.32s"></i><i style="--l:44%;--d:.1s"></i><i style="--l:52%;--d:.26s"></i><i style="--l:60%;--d:.4s"></i><i style="--l:68%;--d:.14s"></i><i style="--l:76%;--d:.34s"></i>
     </div>
+    <div class="curtain curtain-l"></div>
+    <div class="curtain curtain-r"></div>
   </div>
-  
-  <div class="container">
+
+  <div id="cat-view" class="container">
+    <div class="cat-bar">
+      <button class="cat-back" id="cat-back" type="button">← 返回窑口</button>
+      <div class="cat-title">
+        <div>
+          <p class="cat-kicker" id="cat-kicker"></p>
+          <h2 id="cat-title" class="serif"></h2>
+        </div>
+        <span class="cat-count" id="cat-count"></span>
+      </div>
+    </div>
     <div id="loading">正在从云端读取展厅数据，请稍候...</div>
     <div class="gallery-grid" id="gallery"></div>
+    <div class="end-of-content">· 观止 ·</div>
   </div>
   
   <div id="product-modal" class="modal">
@@ -216,11 +333,6 @@
     <img id="lightbox-img" src="" alt="大图">
   </div>
   
-  <footer>
-    <p>© 2024 cc2026cc All Rights Reserved. 荣昌陶艺个人线上展厅</p>
-    <p style="font-size:0.75rem; margin-top:10px; color:#555;">隐私声明：本站仅作陈列展示，不收集任何个人可识别信息。</p>
-  </footer>
-  
   <script>
     const GITHUB_USERNAME = "cc2026cc";
     const REPO_NAME = "my-gallery";
@@ -229,6 +341,25 @@
     const rootRawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main`;
     const stampFilename = 'yinzhang.png';
     const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
+
+    // ─────────────────────────────────────────
+    // 双入口分类体系（窑门双开）
+    // 分类依据：products 下的两个分类文件夹（细陶茶器 / 粗陶花盆）
+    // 加新品只需把资源文件夹放进对应分类目录，无需改任何代码
+    // ─────────────────────────────────────────
+    const CATS = {
+      tea:  { key: 'tea',  folder: '细陶茶器', hash: 'cat-tea',  title: '细陶茶器',       kicker: '上篇 · 泥成器' },
+      clay: { key: 'clay', folder: '粗陶花盆', hash: 'cat-clay', title: '粗陶花盆 · 陶罐', kicker: '下篇 · 火养土' }
+    };
+    const CAT_ORDER = ['tea', 'clay'];
+    const productsByCat = { tea: [], clay: [] };  // 各展厅下的产品数据
+    let currentCat = null;                         // 当前所在展厅
+    let currentModalFolder = null;                 // 当前展开的产品
+
+    // 产品相对路径（分类文件夹/产品文件夹）→ API 可用的编码路径
+    function encRel(rel) {
+      return rel.split('/').map(encodeURIComponent).join('/');
+    }
 
     // ─────────────────────────────────────────
     // 核心智能预加载引擎与缓存控制
@@ -246,13 +377,13 @@
 
     // 交叉观察器：当产品卡片因滑动即将进入视口时，预加载该产品详情页的第一张大图
     const galleryPreloadObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const card = entry.target;
-          const folder = card.dataset.folder;
-          const firstImg = card.dataset.firstImage;
-          if (folder && firstImg) {
-            const url = `${rawBase}/${encodeURIComponent(folder)}/${encodeURIComponent(firstImg)}?t=${CACHE_STAMP}`;
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const card = entry.target;
+            const rel = card.dataset.rel;
+            const firstImg = card.dataset.firstImage;
+            if (rel && firstImg) {
+              const url = `${rawBase}/${encRel(rel)}/${encodeURIComponent(firstImg)}?t=${CACHE_STAMP}`;
             // 延迟 500ms 执行，确保优先加载当前页面的缩略图，不抢占资源
             setTimeout(() => preloadImage(url), 500);
           }
@@ -328,87 +459,160 @@
       return html;
     }
     
+    // ─────────────────────────────────────────
+    // 窑门两侧的实时款数与在售名录
+    // ─────────────────────────────────────────
+
+    function updateDoorMetas() {
+      CAT_ORDER.forEach(function (k) {
+        const list = productsByCat[k];
+        const el = document.getElementById(k === 'tea' ? 'meta-tea' : 'meta-clay');
+        if (!el) return;
+        if (!list.length) { el.textContent = '暂虚位以待'; return; }
+        const names = list.slice(0, 3).map(function (p) { return p.cardName; }).join(' · ');
+        el.textContent = names + (list.length > 3 ? ' 等' : '') + ' — ' + list.length + ' 款在售';
+      });
+    }
+
+    function openCategory(catKey, push) {
+      const cat = CATS[catKey];
+      if (!cat) return;
+      currentCat = catKey;
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('cat-view').classList.add('on');
+      document.getElementById('cat-kicker').textContent = cat.kicker;
+      document.getElementById('cat-title').textContent = cat.title;
+      document.getElementById('cat-count').textContent = productsByCat[catKey].length ? productsByCat[catKey].length + ' 款' : '';
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      gallery.style.opacity = '1';
+      productsByCat[catKey].forEach(function (p) {
+        createCard(p.rel, p.folderName, p.cardName, p.coverImg, p.images, p.infoUrl, p.infoType);
+      });
+      const target = '#' + cat.hash;
+      if (push !== false && window.location.hash !== target) {
+        window.history.pushState(null, '', target);
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function goHome() {
+      currentCat = null;
+      document.getElementById('cat-view').classList.remove('on');
+      document.getElementById('home').style.display = '';
+      if (window.location.hash) {
+        window.history.pushState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+
+    function routeByHash(onLoad) {
+      const hash = decodeURIComponent(window.location.hash.substring(1));
+      if (hash !== currentModalFolder) {
+        document.getElementById('product-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+      if (!hash) {
+        if (!onLoad) goHome();
+        return;
+      }
+      if (hash.indexOf('cat-') === 0) {
+        const key = hash.slice(4);
+        if (CATS[key]) { openCategory(key, false); return; }
+      }
+      // 产品深链：先进入所属展厅，再展开详情
+      let foundCat = null, foundProduct = null;
+      CAT_ORDER.forEach(function (k) {
+        productsByCat[k].forEach(function (p) {
+          if (p.folderName === hash) { foundCat = k; foundProduct = p; }
+        });
+      });
+      if (foundProduct) {
+        openCategory(foundCat, false);
+        openModal(foundProduct.rel, foundProduct.folderName, foundProduct.cardName, foundProduct.images, foundProduct.infoUrl, foundProduct.infoType);
+      } else if (!onLoad) {
+        goHome();
+      }
+    }
+
     async function initGallery() {
-      const galleryElement = document.getElementById('gallery');
       const loadingElement = document.getElementById('loading');
       
       try {
-        const response = await fetch(apiBase);
-        if (!response.ok) throw new Error("无法读取目录");
-        const folders = await response.json();
-        
-        for (let folder of folders) {
-          if (folder.type !== 'dir') continue;
+        // 第一层：两个分类文件夹；第二层：分类下的每个子文件夹即一件产品
+        for (const catKey of CAT_ORDER) {
+          const catFolder = CATS[catKey].folder;
+          let folders = [];
+          try {
+            const catRes = await fetch(`${apiBase}/${encodeURIComponent(catFolder)}`);
+            if (catRes.ok) folders = await catRes.json();
+          } catch (e) { folders = []; }
           
-          const folderName = folder.name;
-          const folderRes = await fetch(`${apiBase}/${encodeURIComponent(folderName)}`);
-          const files = await folderRes.json();
-          
-          let images = [];
-          let infoUrl = '';
-          let infoType = '';
-          let thumbFilename = ''; // 用于存放特定的缩略图
-          
-          files.forEach(file => {
-            const ext = file.name.split('.').pop().toLowerCase();
-            if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
-              // 精准识别带有 thumb 结尾的文件
-              const nameNoExt = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase();
-              if (nameNoExt.endsWith('thumb')) {
-                thumbFilename = file.name; // 提取为缩略图
-              } else {
-                images.push(file.name); // 其他图片推入详情页数组（剥离缩略图）
+          for (let folder of folders) {
+            if (folder.type !== 'dir') continue;
+            
+            const folderName = folder.name;
+            const rel = catFolder + '/' + folderName;
+            const folderRes = await fetch(`${apiBase}/${encRel(rel)}`);
+            const files = await folderRes.json();
+            
+            let images = [];
+            let infoUrl = '';
+            let infoType = '';
+            let thumbFilename = ''; // 用于存放特定的缩略图
+            
+            files.forEach(file => {
+              const ext = file.name.split('.').pop().toLowerCase();
+              if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+                // 精准识别带有 thumb 结尾的文件
+                const nameNoExt = file.name.substring(0, file.name.lastIndexOf('.')).toLowerCase();
+                if (nameNoExt.endsWith('thumb')) {
+                  thumbFilename = file.name; // 提取为缩略图
+                } else {
+                  images.push(file.name); // 其他图片推入详情页数组（剥离缩略图）
+                }
+              } else if (ext === 'md' || ext === 'txt') {
+                if (ext === 'md' || infoType === '') {
+                  infoUrl = `${rawBase}/${encRel(rel)}/${encodeURIComponent(file.name)}`;
+                  infoType = ext;
+                }
               }
-            } else if (ext === 'md' || ext === 'txt') {
-              if (ext === 'md' || infoType === '') {
-                infoUrl = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(file.name)}`;
-                infoType = ext;
-              }
+            });
+            
+            images.sort();
+            
+            // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
+            let finalThumb = thumbFilename;
+            if (!finalThumb && images.length > 0) {
+              finalThumb = images[0]; 
             }
-          });
-          
-          images.sort();
-          
-          // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
-          let finalThumb = thumbFilename;
-          if (!finalThumb && images.length > 0) {
-            finalThumb = images[0]; 
-          }
-            
-          const coverImg = finalThumb 
-            ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(finalThumb)}?t=${CACHE_STAMP}` 
-            : '';
-            
-          const cardName = folderName.includes('-') 
-            ? folderName.split('-').slice(1).join('-') 
-            : folderName;
-            
-          if (coverImg) {
-            createCard(folderName, cardName, coverImg, images, infoUrl, infoType);
+              
+            const coverImg = finalThumb 
+              ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(finalThumb)}?t=${CACHE_STAMP}` 
+              : '';
+              
+            const cardName = folderName.includes('-')
+              ? folderName.split('-').slice(1).join('-')
+              : folderName;
+
+            if (coverImg) {
+              productsByCat[catKey].push({ folderName: folderName, rel: rel, cardName: cardName, coverImg: coverImg, images: images, infoUrl: infoUrl, infoType: infoType });
+            }
           }
         }
+        CAT_ORDER.forEach(function (k) {
+          productsByCat[k].sort(function (a, b) { return a.folderName.localeCompare(b.folderName, 'zh'); });
+        });
+        updateDoorMetas();
         loadingElement.style.display = 'none';
-        galleryElement.style.opacity = '1';
-        
-        setTimeout(() => {
-          const hash = decodeURIComponent(window.location.hash.substring(1));
-          if (hash) {
-            const cards = document.querySelectorAll('.product-card');
-            for (let card of cards) {
-              if (card.getAttribute('data-folder') === hash) {
-                card.click();
-                break;
-              }
-            }
-          }
-        }, 100);
-        
+        routeByHash(true);
       } catch (error) {
         loadingElement.innerHTML = '⚠ 数据读取失败。';
+        document.getElementById('meta-tea').textContent = '展厅数据读取失败';
+        document.getElementById('meta-clay').textContent = '展厅数据读取失败';
       }
     }
     
-    function createCard(folderName, cardName, coverUrl, allImages, infoUrl, infoType) {
+    function createCard(rel, folderName, cardName, coverUrl, allImages, infoUrl, infoType) {
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
       card.className = 'product-card';
@@ -421,22 +625,24 @@
       // 绑定滑动进入屏幕预加载
       if (allImages && allImages.length > 0) {
         card.dataset.folder = folderName;
+        card.dataset.rel = rel;
         card.dataset.firstImage = allImages[0];
         galleryPreloadObserver.observe(card);
 
         // 绑定鼠标悬停或触碰预加载（意图预判：此时用户极可能马上点击）
         const prefetchIntent = () => {
-          preloadImage(`${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(allImages[0])}?t=${CACHE_STAMP}`);
+          preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(allImages[0])}?t=${CACHE_STAMP}`);
         };
         card.addEventListener('mouseenter', prefetchIntent, {once: true});
         card.addEventListener('touchstart', prefetchIntent, {once: true, passive: true});
       }
 
-      card.onclick = () => openModal(folderName, cardName, allImages, infoUrl, infoType);
+      card.onclick = () => openModal(rel, folderName, cardName, allImages, infoUrl, infoType);
       gallery.appendChild(card);
     }
     
-    async function openModal(folderName, fallbackName, images, infoUrl, infoType) {
+    async function openModal(rel, folderName, fallbackName, images, infoUrl, infoType) {
+      currentModalFolder = folderName;
       if (decodeURIComponent(window.location.hash.substring(1)) !== folderName) {
         window.history.pushState(null, '', '#' + encodeURIComponent(folderName));
       }
@@ -485,11 +691,11 @@
         wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
       }
       
-      const firstImgSrc = images.length > 0 ? `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
+      const firstImgSrc = images.length > 0 ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
       
       let restImgsHTML = '';
       for (let i = 1; i < images.length; i++) {
-        const src = `${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
+        const src = `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
         restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
       }
       
@@ -515,7 +721,7 @@
       // 等用户看完文字下滑时，所有图片直接从本地缓存秒渲染
       setTimeout(() => {
         for (let i = 1; i < images.length; i++) {
-           preloadImage(`${rawBase}/${encodeURIComponent(folderName)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
+           preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
         }
       }, 400); 
     }
@@ -525,33 +731,22 @@
     }
     
     function closeModal() {
+      currentModalFolder = null;
       document.getElementById('product-modal').style.display = 'none';
       document.body.style.overflow = 'auto';
       
       const hideHomeStyle = document.getElementById('hide-home-style');
       if (hideHomeStyle) hideHomeStyle.remove();
       
-      if (window.location.hash) {
+      if (currentCat) {
+        openCategory(currentCat);
+      } else if (window.location.hash) {
         window.history.pushState(null, '', window.location.pathname + window.location.search);
       }
     }
     
     window.addEventListener('popstate', () => {
-      const hash = decodeURIComponent(window.location.hash.substring(1));
-      if (hash) {
-        const cards = document.querySelectorAll('.product-card');
-        for (let card of cards) {
-          if (card.getAttribute('data-folder') === hash) {
-            card.click();
-            break;
-          }
-        }
-      } else {
-        document.getElementById('product-modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-        const hideHomeStyle = document.getElementById('hide-home-style');
-        if (hideHomeStyle) hideHomeStyle.remove();
-      }
+      routeByHash(false);
     });
     
     // ─────────────────────────────────────────
@@ -716,6 +911,27 @@
     }
     
     initGallery();
+
+    // 窑门交互：点门进展厅
+    document.getElementById('door-tea').addEventListener('click', function (e) { e.preventDefault(); openCategory('tea'); });
+    document.getElementById('door-clay').addEventListener('click', function (e) { e.preventDefault(); openCategory('clay'); });
+    document.getElementById('cat-back').addEventListener('click', function () { goHome(); });
+
+    // 开窑仪式：帘幕向两侧拉开，火光与火星随之淡入
+    document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('ready'); });
+
+    // 鼠标视差：探头看窑的纵深感
+    (function () {
+      var st = document.querySelector('.stage'), raf = null;
+      window.addEventListener('mousemove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          st.style.setProperty('--px', ((e.clientX / window.innerWidth - .5) * 2).toFixed(3));
+          st.style.setProperty('--py', ((e.clientY / window.innerHeight - .5) * 2).toFixed(3));
+          raf = null;
+        });
+      }, { passive: true });
+    })();
   </script>
 </body>
 </html>
