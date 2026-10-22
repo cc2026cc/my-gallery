@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>荣昌陶 · 细陶茶器 / 粗陶花盆陶罐</title>
+  <title>荣昌陶 · 茶器 / 花器</title>
   <link rel="preconnect" href="https://api.github.com" crossorigin>
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
   
@@ -30,6 +30,10 @@
       --sans: -apple-system,BlinkMacSystemFont,"PingFang SC","MiSans","Noto Sans SC","Source Han Sans SC",sans-serif;
     }
     
+    /* 全局盒模型重置：默认 content-box 会让 "width:100% + 内边距" 的元素比父容器
+       宽出一截（窑门文字被裁的根因），border-box 让宽度含内边距，符合直觉 */
+    *, *::before, *::after { box-sizing: border-box; }
+
     body, html {
       margin: 0; padding: 0;
       background-color: #0a0908;
@@ -43,7 +47,7 @@
     /* ===== 窑门双开 · 首页 ===== */
     #home { position: relative; }
     .stage { position: fixed; inset: 0; display: flex; flex-direction: column; --px: 0; --py: 0; }
-    .door { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; cursor: pointer; transition: flex-grow .45s cubic-bezier(.22,.8,.24,1); text-decoration: none; color: inherit; }
+    .door { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; cursor: pointer; transition: flex-grow .45s cubic-bezier(.22,.8,.24,1) .08s; text-decoration: none; color: inherit; }
     .door-tea { flex: 1.35; }
     .door-clay { flex: 1; background: #1a0f08; align-items: flex-end; }
     .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: translate3d(calc(var(--px) * -12px), calc(var(--py) * -12px), 0) scale(1.02); transition: transform .35s ease-out; will-change: transform; }
@@ -53,48 +57,50 @@
     .door-clay .shade { background: linear-gradient(180deg, rgba(30,14,5,.82), rgba(30,14,5,.28) 42%, rgba(20,9,3,.92)); }
     .zone-body { position: relative; padding: 0 28px 13vh; max-width: 680px; width: 100%; }
     .door-clay .zone-body { margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-    .kicker { font-size: 12px; letter-spacing: .5em; color: var(--gold); margin-bottom: 12px; }
-    .door h1 { font-size: clamp(40px, 5.6vw, 88px); font-weight: 600; letter-spacing: .1em; font-family: var(--serif); line-height: 1.15; margin: 0; }
+    .door h1 { font-size: clamp(40px, 5.6vw, 88px); font-weight: 600; letter-spacing: .08em; font-family: var(--serif); line-height: 1.15; margin: 0; }
+    /* 两门标题都是 4 个字、对称同档；粗陶门仅 42.6% 宽，封顶 58px 防右缘被裁 */
+    .door-clay h1 { font-size: clamp(34px, 4vw, 58px); }
     .meta { margin-top: 12px; font-size: clamp(12px, 1.05vw, 14px); letter-spacing: .08em; color: rgba(242,232,213,.72); min-height: 1.4em; }
     .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 11px 24px; border: 1px solid rgba(216,168,94,.5); border-radius: 999px; font-size: 13px; letter-spacing: .24em; color: var(--gold-l); transition: background .3s, color .3s, border-color .3s; }
     .go svg { width: 12px; height: 12px; }
     .door:hover .go { background: var(--gold); border-color: var(--gold); color: #1a1409; }
     .seam { position: relative; flex: 0 0 1px; align-self: stretch; background: linear-gradient(90deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); z-index: 5; }
-    .seam i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; border-radius: 50%; background: #14100b; border: 1px solid var(--gold); display: grid; place-items: center; color: var(--gold); font-size: 13px; font-style: normal; font-family: var(--serif); }
     .top { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(20px + env(safe-area-inset-top)) 32px 8px; z-index: 8; pointer-events: none; }
     .top b { font-size: 19px; font-weight: 600; letter-spacing: .5em; font-family: var(--serif); }
     .top .slogan { display: none; font-size: 11px; letter-spacing: .28em; color: rgba(242,232,213,.55); font-family: var(--serif); }
     .top span { font-size: 12px; letter-spacing: .16em; color: var(--gold); }
-    .bot { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 32px calc(16px + env(safe-area-inset-bottom)); font-size: 11px; letter-spacing: .18em; color: rgba(242,232,213,.5); z-index: 8; pointer-events: none; }
-    .bot .side { display: none; }
     .curtain { position: fixed; left: 0; right: 0; height: 50.8%; background: #100d0a; z-index: 20; transition: transform 1.15s cubic-bezier(.7,0,.2,1); pointer-events: auto; }
     .curtain-l { top: 0; border-bottom: 1px solid rgba(216,168,94,.25); }
     .curtain-r { bottom: 0; border-top: 1px solid rgba(216,168,94,.25); }
     body.ready .curtain-l { transform: translateY(-101%); }
     body.ready .curtain-r { transform: translateY(101%); }
     body.ready .curtain { pointer-events: none; }
-    .glow { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 70vmax; height: 70vmax; background: radial-gradient(circle, rgba(239,159,39,.26), rgba(216,90,48,.1) 42%, transparent 70%); z-index: 19; pointer-events: none; animation: fadeGlow 1.8s ease .3s forwards; }
+    .glow { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 70vmax; height: 70vmax; background: radial-gradient(circle, rgba(239,159,39,.26), rgba(216,90,48,.1) 42%, transparent 70%); z-index: 19; pointer-events: none; animation: fadeGlow 5.4s ease .3s forwards; }
     @keyframes fadeGlow { to { opacity: 0; } }
     .embers { position: fixed; inset: 0; z-index: 21; pointer-events: none; overflow: hidden; }
-    .embers i { position: absolute; bottom: -8px; left: var(--l); width: 3px; height: 3px; border-radius: 50%; background: var(--gold-l); opacity: 0; animation: rise 1.7s ease-out var(--d) forwards; }
+    .embers i { position: absolute; bottom: -8px; left: var(--l); width: 3px; height: 3px; border-radius: 50%; background: var(--gold-l); opacity: 0; animation: rise 5.1s ease-out var(--d) forwards; }
     @keyframes rise { 12% { opacity: .95; } 100% { transform: translateY(-52vh) scale(.3); opacity: 0; } }
     .door:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
     @media (max-width: 899px) {
       .door-clay { justify-content: flex-start; }
       .door-clay .zone-body { padding: 36px 28px 0; }
+      /* 手机窄屏：两门标题分别限档，4 个字在任何窄屏都不会被裁 */
+      .door-tea h1 { font-size: clamp(34px, 9vw, 46px); }
+      .door-clay h1 { font-size: clamp(30px, 8vw, 40px); }
     }
     @media (hover: hover) {
-      .stage:has(.door-tea:hover) .door-tea { flex: 1.15; }
-      .stage:has(.door-tea:hover) .door-clay { flex: .95; }
-      .stage:has(.door-clay:hover) .door-clay { flex: 1.12; }
-      .stage:has(.door-clay:hover) .door-tea { flex: .96; }
+      /* 互斥 + 80ms 过渡死区：鼠标压在 1px 窑缝上时两扇门可能同时 :hover，
+         flex 值反复横跳就是"中线抽搐"的根因；:not(:has()) 保证只有一个门响应 */
+      .stage:has(.door-tea:hover):not(:has(.door-clay:hover)) .door-tea { flex: 1.55; }
+      .stage:has(.door-tea:hover):not(:has(.door-clay:hover)) .door-clay { flex: .94; }
+      .stage:has(.door-clay:hover):not(:has(.door-tea:hover)) .door-clay { flex: 1.08; }
+      .stage:has(.door-clay:hover):not(:has(.door-tea:hover)) .door-tea { flex: 1.27; }
     }
     @media (min-width: 900px) {
       .stage { flex-direction: row; }
       .seam { background: linear-gradient(180deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); }
       .zone-body { padding: 0 6vw 15vh; }
       .top .slogan { display: block; }
-      .bot .side { display: block; }
     }
     @media (prefers-reduced-motion: reduce) {
       .curtain, .glow, .embers { display: none; }
@@ -110,7 +116,6 @@
     .cat-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
     .cat-title h2 { margin: 0; font-size: 1.6rem; letter-spacing: .08em; }
     .cat-count { font-size: 12px; letter-spacing: .2em; color: var(--text-light); }
-    .cat-kicker { font-size: 11px; letter-spacing: .4em; color: var(--gold); margin: 0 0 8px 0; }
     
     /* ===== Gallery ===== */
     .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
@@ -210,6 +215,10 @@
       font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; 
     }
     .btn-wechat:hover { background-color: #e5b686; }
+
+    /* 按钮内的灰色辅助提示：主信息醒目、提示退后 */
+    .btn-wechat .hint { color: rgba(18,18,18,.45); font-size: .85em; margin-left: .4em; font-weight: 400; }
+    .btn-sold-status .hint { color: rgba(212,163,115,.6); font-size: .85em; margin-left: .4em; font-weight: 400; }
     
     /* 已结缘按钮：缩小体积 + 中式双线典雅边框 */
     .btn-sold-status {
@@ -263,41 +272,34 @@
       <a class="door door-tea" id="door-tea" href="#cat-tea">
         <picture>
           <source media="(min-width:900px)" srcset="assets/tea-hero-pc.jpg">
-          <img class="door-img" src="assets/tea-hero.jpg" alt="细陶茶器：茶席上的柴烧壶" fetchpriority="high" decoding="async">
+          <img class="door-img" src="assets/tea-hero.jpg" alt="茶器：茶席上的柴烧壶" fetchpriority="high" decoding="async">
         </picture>
         <div class="shade"></div>
         <div class="zone-body">
-          <p class="kicker">上篇 · 泥成器</p>
-          <h1>细陶茶器</h1>
+          <h1>茶器</h1>
           <p class="meta" id="meta-tea">正从窑火中请出…</p>
-          <span class="go">进展厅 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          <span class="go">更多 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
         </div>
       </a>
-      <div class="seam"><i>窑</i></div>
+      <div class="seam"></div>
       <a class="door door-clay" id="door-clay" href="#cat-clay">
         <picture>
           <source media="(min-width:900px)" srcset="assets/clay-hero-pc.jpg">
-          <img class="door-img" src="assets/clay-hero.jpg" alt="粗陶花盆陶罐：手作国际盆" fetchpriority="high" decoding="async">
+          <img class="door-img" src="assets/clay-hero.jpg" alt="花器：手作国际盆" fetchpriority="high" decoding="async">
         </picture>
         <div class="shade"></div>
         <div class="zone-body">
-          <p class="kicker">下篇 · 火养土</p>
-          <h1>粗陶花盆 · 陶罐</h1>
+          <h1>花器</h1>
           <p class="meta" id="meta-clay">正从窑火中请出…</p>
-          <span class="go">进展厅 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          <span class="go">更多 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
         </div>
       </a>
     </div>
     <header class="top">
       <b>荣昌陶</b>
       <span class="slogan">泥火交融，凝结匠心 · 每一件作品，都是与时间的对话</span>
-      <span>结缘 · CJQ678</span>
+      <span>微信：CJQ678</span>
     </header>
-    <footer class="bot">
-      <span class="side">荣昌陶个人作品展厅</span>
-      <span class="mid">© 2026 · 仅作陈列展示 · 不收集个人信息</span>
-      <span class="side">细陶茶器 / 粗陶花盆陶罐</span>
-    </footer>
     <div class="glow"></div>
     <div class="embers">
       <i style="--l:20%;--d:.05s"></i><i style="--l:28%;--d:.18s"></i><i style="--l:36%;--d:.32s"></i><i style="--l:44%;--d:.1s"></i><i style="--l:52%;--d:.26s"></i><i style="--l:60%;--d:.4s"></i><i style="--l:68%;--d:.14s"></i><i style="--l:76%;--d:.34s"></i>
@@ -308,10 +310,9 @@
 
   <div id="cat-view" class="container">
     <div class="cat-bar">
-      <button class="cat-back" id="cat-back" type="button">← 返回窑口</button>
+      <button class="cat-back" id="cat-back" type="button">← 返回首页</button>
       <div class="cat-title">
         <div>
-          <p class="cat-kicker" id="cat-kicker"></p>
           <h2 id="cat-title" class="serif"></h2>
         </div>
         <span class="cat-count" id="cat-count"></span>
@@ -348,8 +349,8 @@
     // 加新品只需把资源文件夹放进对应分类目录，无需改任何代码
     // ─────────────────────────────────────────
     const CATS = {
-      tea:  { key: 'tea',  folder: '细陶茶器', hash: 'cat-tea',  title: '细陶茶器',       kicker: '上篇 · 泥成器' },
-      clay: { key: 'clay', folder: '粗陶花盆', hash: 'cat-clay', title: '粗陶花盆 · 陶罐', kicker: '下篇 · 火养土' }
+      tea:  { key: 'tea',  folder: '细陶茶器', hash: 'cat-tea',  title: '茶器' },
+      clay: { key: 'clay', folder: '粗陶花盆', hash: 'cat-clay', title: '花器' }
     };
     const CAT_ORDER = ['tea', 'clay'];
     const productsByCat = { tea: [], clay: [] };  // 各展厅下的产品数据
@@ -480,7 +481,6 @@
       currentCat = catKey;
       document.getElementById('home').style.display = 'none';
       document.getElementById('cat-view').classList.add('on');
-      document.getElementById('cat-kicker').textContent = cat.kicker;
       document.getElementById('cat-title').textContent = cat.title;
       document.getElementById('cat-count').textContent = productsByCat[catKey].length ? productsByCat[catKey].length + ' 款' : '';
       const gallery = document.getElementById('gallery');
@@ -578,7 +578,17 @@
               }
             });
             
-            images.sort();
+            // 图片排序规则（老站规则，按文件名中的数字大小排）：
+            // 末尾带 "-序号" 的（-0/-1/-2…-10）按序号数字升序；无序号排其后按文件名；
+            // 序号相同按文件名。例：国际盆 6 张 → -0,-1,-2,-3,-4,-5
+            images.sort(function (a, b) {
+              function tailNo(n) { var m = n.match(/-(\d+)(\.[^.]+)?$/); return m ? parseInt(m[1], 10) : NaN; }
+              var na = tailNo(a), nb = tailNo(b);
+              var aHas = !isNaN(na), bHas = !isNaN(nb);
+              if (aHas !== bHas) return aHas ? -1 : 1;
+              if (aHas && bHas && na !== nb) return na - nb;
+              return a < b ? -1 : (a > b ? 1 : 0);
+            });
             
             // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
             let finalThumb = thumbFilename;
@@ -682,13 +692,13 @@
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
       
-      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已结缘">` : '';
+      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">` : '';
       
       let wechatBtnHTML = '';
       if (isSold) {
-        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已结缘·交流加微信CJQ678</div>`;
+        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已售出 · 微信 CJQ678<span class="hint">（点击复制）</span></div>`;
       } else {
-        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">结缘咨询 (复制微信号 CJQ678)</div>`;
+        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">微信号 CJQ678<span class="hint">（点击复制）</span></div>`;
       }
       
       const firstImgSrc = images.length > 0 ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
@@ -912,7 +922,7 @@
     
     initGallery();
 
-    // 窑门交互：点门进展厅
+    // 窑门交互：点门进入分类展厅
     document.getElementById('door-tea').addEventListener('click', function (e) { e.preventDefault(); openCategory('tea'); });
     document.getElementById('door-clay').addEventListener('click', function (e) { e.preventDefault(); openCategory('clay'); });
     document.getElementById('cat-back').addEventListener('click', function () { goHome(); });
