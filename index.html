@@ -507,6 +507,13 @@
       img.src = url;
     }
 
+    // 带超时的 fetch：图片源（raw.githubusercontent）偶发挂起时，避免整个页面被拖死
+    function fetchWithTimeout(url, ms) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms || 8000);
+      return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+    }
+
     // 交叉观察器：当产品卡片因滑动即将进入视口时，预加载该产品详情页的第一张大图
     const galleryPreloadObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -756,21 +763,10 @@
               ? folderName.split('-').slice(1).join('-')
               : folderName;
 
-            // 粗陶花盆：从 info.txt 读取「价格」行与规格行（展厅卡片吊牌 + 详情价格条用）
-            let clayPrice = '', claySpec = '';
-            if (catKey === 'clay' && infoUrl) {
-              try {
-                const ires = await fetch(`${infoUrl}?t=${CACHE_STAMP}`);
-                const itext = new TextDecoder('utf-8').decode(await ires.arrayBuffer());
-                const pm = itext.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
-                if (pm) clayPrice = pm[1].trim().replace(/^¥\s*/, '');
-                const sm = itext.match(/^[ \t]*(口径[^\n]*)$/m);
-                if (sm) claySpec = sm[1].trim().replace(/，/g, ' · ');
-              } catch (e) { /* 读不到就不显示价格，不影响其他 */ }
-            }
-
+            // 注意：粗陶的价格/规格不在这里拉取（串行 await 会拖慢整个展厅初始化），
+            // 统一由 loadClayMeta() 在展厅渲染后后台并行补齐
             if (coverImg) {
-              productsByCat[catKey].push({ folderName: folderName, rel: rel, cardName: cardName, coverImg: coverImg, images: images, infoUrl: infoUrl, infoType: infoType, price: clayPrice, spec: claySpec });
+              productsByCat[catKey].push({ folderName: folderName, rel: rel, cardName: cardName, coverImg: coverImg, images: images, infoUrl: infoUrl, infoType: infoType, price: '', spec: '' });
             }
           }
         }
@@ -780,6 +776,7 @@
         updateDoorMetas();
         loadingElement.style.display = 'none';
         routeByHash(true);
+        loadClayMeta(); // 后台并行补价格吊牌，不阻塞首屏
       } catch (error) {
         loadingElement.innerHTML = '⚠ 数据读取失败。';
         document.getElementById('meta-tea').textContent = '展厅数据读取失败';
@@ -787,6 +784,43 @@
       }
     }
     
+    // 粗陶花盆：后台并行读取各产品 info.txt 的「价格」与规格行，补齐卡片吊牌。
+    // 故意不放进初始化主流程——raw 图片源偶发挂起，串行 await 会把整个展厅拖死。
+    function loadClayMeta() {
+      productsByCat.clay.forEach(function (p, idx) {
+        if (!p.infoUrl) return;
+        fetchWithTimeout(`${p.infoUrl}?t=${CACHE_STAMP}`, 8000)
+          .then(function (r) { return r.arrayBuffer(); })
+          .then(function (buf) {
+            const itext = new TextDecoder('utf-8').decode(buf);
+            const pm = itext.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
+            if (pm) p.price = pm[1].trim().replace(/^¥\s*/, '');
+            const sm = itext.match(/^[ \t]*(口径[^\n]*)$/m);
+            if (sm) p.spec = sm[1].trim().replace(/，/g, ' · ');
+            if (currentCat === 'clay') patchClayCard(idx, p);
+          })
+          .catch(function () { /* 读不到就不显示价格，不影响其他 */ });
+      });
+    }
+
+    function patchClayCard(idx, p) {
+      const cards = document.querySelectorAll('#gallery .product-card.clay-card');
+      const card = cards[idx];
+      if (!card) return;
+      if (p.price && !card.querySelector('.clay-tag')) {
+        const tag = document.createElement('span');
+        tag.className = 'clay-tag';
+        tag.textContent = '¥' + p.price;
+        card.querySelector('.clay-pic').appendChild(tag);
+      }
+      if (p.spec && !card.querySelector('.clay-spec')) {
+        const s = document.createElement('div');
+        s.className = 'clay-spec';
+        s.textContent = p.spec;
+        card.querySelector('.product-info').appendChild(s);
+      }
+    }
+
     function createCard(rel, folderName, cardName, coverUrl, allImages, infoUrl, infoType, price, spec) {
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
@@ -829,22 +863,68 @@
       if (decodeURIComponent(window.location.hash.substring(1)) !== folderName) {
         window.history.pushState(null, '', '#' + encodeURIComponent(folderName));
       }
-      
+
       const modal = document.getElementById('product-modal');
       const dynamicBox = document.getElementById('modal-dynamic-box');
-      
+
       modal.style.display = 'block';
       document.body.style.overflow = 'hidden';
-      
+
+      const isClay = rel.indexOf(CATS.clay.folder + '/') === 0;
+      const firstImgSrc = images.length > 0 ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
+
+      let restImgsHTML = '';
+      for (let i = 1; i < images.length; i++) {
+        const src = `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
+        restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
+      }
+
+      // 第一步：立即渲染骨架——图片马上开始加载，不等信息文本（txt 网络挂起时不挡图）
+      dynamicBox.innerHTML = isClay ? `
+        <div class="modal-content-dynamic">
+          <div class="detail-hero-wrapper" id="m-hero">
+            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
+          </div>
+          <div class="clay-price-bar">
+            <span class="clay-p" id="m-price"></span>
+            <span class="clay-s" id="m-spec">${escapeHtml(fallbackName)}</span>
+            <span id="m-btn" style="display:contents"></span>
+          </div>
+          <div class="detail-text-card" id="m-text" style="display:none"></div>
+          <div class="detail-images-list">${restImgsHTML}</div>
+          <div class="end-of-content">· 观止 ·</div>
+        </div>
+      ` : `
+        <div class="modal-content-dynamic">
+          <div class="detail-hero-wrapper" id="m-hero">
+            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
+          </div>
+          <div class="detail-text-card">
+            <h2 class="serif main-title" id="m-title">${escapeHtml(fallbackName)}</h2>
+            <div class="txt-body" id="m-body">正在读取介绍…</div>
+            <div class="btn-row" id="m-btn"></div>
+          </div>
+          <div class="detail-images-list">${restImgsHTML}</div>
+          <div class="end-of-content">· 观止 ·</div>
+        </div>
+      `;
+
+      // 后台静默预拉剩余图片（看完文字下滑时秒渲染）
+      setTimeout(() => {
+        for (let i = 1; i < images.length; i++) {
+           preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
+        }
+      }, 400);
+
+      // 第二步：异步拉取介绍文字（带 8 秒超时，挂了也不影响图片）
       let docTitle = fallbackName;
       let bodyHTML = '';
       let isSold = false;
-      const isClay = rel.indexOf(CATS.clay.folder + '/') === 0;
       let clayPrice = '', claySpec = '';
 
       if (infoUrl) {
         try {
-          const res = await fetch(`${infoUrl}?t=${CACHE_STAMP}`);
+          const res = await fetchWithTimeout(`${infoUrl}?t=${CACHE_STAMP}`, 8000);
           const buffer = await res.arrayBuffer();
           const text = new TextDecoder('utf-8').decode(buffer);
 
@@ -875,69 +955,38 @@
             bodyHTML = `<div class="txt-body">${escapeHtml(bodyText)}</div>`;
           }
         } catch (e) {
-          bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
+          bodyHTML = '<div class="txt-body">（介绍读取失败，详见图片展示）</div>';
         }
       } else {
         bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
       }
-      
-      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">` : '';
-      
-      let wechatBtnHTML = '';
-      if (isSold) {
-        wechatBtnHTML = `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已售出 · 微信 CJQ678<span class="hint">（点击复制）</span></div>`;
-      } else {
-        wechatBtnHTML = `<div class="btn-wechat" onclick="copyWechat()">微信号 CJQ678<span class="hint">（点击复制）</span></div>`;
-      }
-      
-      const firstImgSrc = images.length > 0 ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
-      
-      let restImgsHTML = '';
-      for (let i = 1; i < images.length; i++) {
-        const src = `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
-        restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
-      }
-      
-      dynamicBox.innerHTML = isClay ? `
-        <div class="modal-content-dynamic">
-          <div class="detail-hero-wrapper">
-            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
-            ${stampHero}
-          </div>
-          <div class="clay-price-bar">
-            ${clayPrice ? `<span class="clay-p">¥${escapeHtml(clayPrice)}</span>` : ''}
-            <span class="clay-s">${escapeHtml(docTitle)}${claySpec ? ' · ' + escapeHtml(claySpec) : ''}</span>
-            ${wechatBtnHTML}
-          </div>
-          ${bodyHTML ? `<div class="detail-text-card">${bodyHTML}</div>` : ''}
-          <div class="detail-images-list">${restImgsHTML}</div>
-          <div class="end-of-content">· 观止 ·</div>
-        </div>
-      ` : `
-        <div class="modal-content-dynamic">
-          <div class="detail-hero-wrapper">
-            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
-            ${stampHero}
-          </div>
-          <div class="detail-text-card">
-            <h2 class="serif main-title">${escapeHtml(docTitle)}</h2>
-            ${bodyHTML}
-            <div class="btn-row">
-              ${wechatBtnHTML}
-            </div>
-          </div>
-          <div class="detail-images-list">${restImgsHTML}</div>
-          <div class="end-of-content">· 观止 ·</div>
-        </div>
-      `;
 
-      // 当用户已经打开详情页时，后台静默将此页面的剩余图片预先拉取下来
-      // 等用户看完文字下滑时，所有图片直接从本地缓存秒渲染
-      setTimeout(() => {
-        for (let i = 1; i < images.length; i++) {
-           preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
-        }
-      }, 400); 
+      // 已切换到其他产品/关闭了详情，放弃回填
+      if (currentModalFolder !== folderName) return;
+
+      const wechatBtnHTML = isSold
+        ? `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已售出 · 微信 CJQ678<span class="hint">（点击复制）</span></div>`
+        : `<div class="btn-wechat" onclick="copyWechat()">微信号 CJQ678<span class="hint">（点击复制）</span></div>`;
+      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">` : '';
+
+      const heroBox = document.getElementById('m-hero');
+      if (heroBox && stampHero) heroBox.insertAdjacentHTML('beforeend', stampHero);
+      const btnBox = document.getElementById('m-btn');
+      if (btnBox) btnBox.innerHTML = wechatBtnHTML;
+
+      if (isClay) {
+        const priceEl = document.getElementById('m-price');
+        if (priceEl) { if (clayPrice) priceEl.textContent = '¥' + clayPrice; else priceEl.remove(); }
+        const specEl = document.getElementById('m-spec');
+        if (specEl) specEl.textContent = docTitle + (claySpec ? ' · ' + claySpec : '');
+        const textEl = document.getElementById('m-text');
+        if (textEl && bodyHTML) { textEl.innerHTML = bodyHTML; textEl.style.display = ''; }
+      } else {
+        const titleEl = document.getElementById('m-title');
+        if (titleEl) titleEl.textContent = docTitle;
+        const bodyEl = document.getElementById('m-body');
+        if (bodyEl && bodyHTML) bodyEl.outerHTML = bodyHTML;
+      }
     }
     
     function escapeHtml(str) {
