@@ -286,6 +286,43 @@
     /* ===== 详情图列表与底部标识 ===== */
     .detail-images-list { max-width: 800px; margin: 0 auto; padding: 0 20px 0 20px; display: block; }
     .detail-images-list img { width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; display: block; }
+
+    /* ── 粗陶花盆独立展厅：交易必读告示牌（方案一） ── */
+    .clay-notice { background: #3a2c18; border: 1px solid #6b4f24; border-left: 6px solid var(--gold); border-radius: 4px; padding: 26px 26px 22px; margin: 10px 0 46px; }
+    .clay-notice .notice-tag { display: inline-block; background: var(--gold); color: #241a0c; font-size: 12px; letter-spacing: .3em; padding: 4px 12px; border-radius: 2px; margin-bottom: 14px; }
+    .clay-notice h3 { font-family: var(--serif); font-size: 23px; font-weight: 600; color: var(--gold-l); margin: 0 0 18px; letter-spacing: .05em; }
+    .clay-notice ol { list-style: none; counter-reset: cn; margin: 0; padding: 0; }
+    .clay-notice li { counter-increment: cn; position: relative; padding: 8px 0 8px 40px; font-size: 14.5px; color: #e8dcc4; border-bottom: 1px dashed rgba(216,168,94,.18); line-height: 1.75; }
+    .clay-notice li:last-child { border-bottom: none; }
+    .clay-notice li::before { content: counter(cn); position: absolute; left: 0; top: 9px; width: 26px; height: 26px; background: #241a0c; border: 1px solid var(--gold); border-radius: 3px; color: var(--gold-l); font-size: 13px; display: flex; align-items: center; justify-content: center; font-family: var(--serif); }
+    .clay-notice .notice-foot { margin-top: 16px; font-size: 13px; color: var(--accent-color); }
+    @media (max-width: 768px) {
+      .clay-notice { padding: 20px 18px 18px; }
+      .clay-notice h3 { font-size: 19px; }
+      .clay-notice li { font-size: 13.5px; }
+    }
+
+    /* ── 粗陶卡片：吊牌价格 + 方案三悬停（上浮 4px + 图缓放 4%） ── */
+    .product-card.clay-card { background: none; padding: 0; box-shadow: none; border-radius: 0; }
+    .product-card.clay-card:hover { transform: translateY(-4px); box-shadow: none; }
+    .product-card.clay-card .clay-pic { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #0d0d0d; border-radius: 2px; }
+    .product-card.clay-card .clay-pic img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+    .product-card.clay-card:hover .clay-pic img { transform: scale(1.04); }
+    .clay-tag { position: absolute; right: 10px; top: 0; background: var(--gold); color: #241a0c; font-family: var(--serif); font-size: 15px; padding: 7px 11px 5px; border-radius: 0 0 3px 3px; box-shadow: 0 3px 10px rgba(0,0,0,.5); letter-spacing: .02em; z-index: 2; }
+    .clay-tag::before { content: ""; position: absolute; left: 50%; top: -9px; transform: translateX(-50%); width: 2px; height: 9px; background: #6b4f24; }
+    .product-card.clay-card .product-info { text-align: left; padding: 13px 2px 0; }
+    .product-card.clay-card .product-info h3 { font-size: 16px; }
+    .clay-spec { font-size: 12.5px; color: var(--text-light); margin-top: 3px; }
+
+    /* ── 粗陶详情：价格条 ── */
+    .clay-price-bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 18px; padding: 18px 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; margin: -40px 20px 34px; position: relative; z-index: 3; }
+    .clay-price-bar .clay-p { font-size: 32px; color: var(--gold-l); font-family: var(--serif); }
+    .clay-price-bar .clay-s { font-size: 13.5px; color: var(--text-light); }
+    .clay-price-bar .btn-wechat { margin-left: auto; }
+    @media (max-width: 768px) {
+      .clay-price-bar { margin: -24px 12px 26px; padding: 14px 16px; }
+      .clay-price-bar .clay-p { font-size: 26px; }
+    }
     
     .end-of-content {
       text-align: center; padding: 10px 0 60px 0; color: var(--text-light);
@@ -368,6 +405,7 @@
       </div>
     </div>
     <div id="loading">正在从云端读取展厅数据，请稍候...</div>
+    <div id="clay-notice"></div>
     <div class="gallery-grid" id="gallery"></div>
     <div class="end-of-content">· 观止 ·</div>
   </div>
@@ -568,6 +606,15 @@
       });
     }
 
+    // 粗陶花盆展厅顶部的交易必读告示牌（文案与 info.txt 中【交易必读】保持一致）
+    const CLAY_NOTICE = [
+      '盆重压秤，单发运费肉疼，3 个起发（本店任意陶盆），可混搭，让你运费花得值。',
+      '运费实收，不搞假包邮，物流报多少收多少，习惯 9.9 包邮的请绕道。',
+      '拒绝面交，精力有限，谢绝同城自提与线下探店，问地址不回（单笔 2 万以上工程大单除外）。',
+      '同城送货，近距离可安排送货，需收取合理运费。',
+      '佛系不议价，全店实价不抹零，若聊得投机，包裹里可能会随机赠送花盆，全看心情。'
+    ];
+
     function openCategory(catKey, push) {
       const cat = CATS[catKey];
       if (!cat) return;
@@ -576,11 +623,23 @@
       document.getElementById('cat-view').classList.add('on');
       document.getElementById('cat-title').textContent = cat.title;
       document.getElementById('cat-count').textContent = productsByCat[catKey].length ? productsByCat[catKey].length + ' 款' : '';
+      // 粗陶展厅：顶部挂交易必读告示牌；细陶展厅：清空
+      const noticeBox = document.getElementById('clay-notice');
+      if (catKey === 'clay') {
+        noticeBox.innerHTML = `<div class="clay-notice">
+          <div class="notice-tag">交易必读</div>
+          <h3>下单前请看完这 5 条</h3>
+          <ol>${CLAY_NOTICE.map(function (t) { return '<li>' + t + '</li>'; }).join('')}</ol>
+          <div class="notice-foot">看完还有疑问 → 微信：CJQ678（点击右上角或详情页按钮复制）</div>
+        </div>`;
+      } else {
+        noticeBox.innerHTML = '';
+      }
       const gallery = document.getElementById('gallery');
       gallery.innerHTML = '';
       gallery.style.opacity = '1';
       productsByCat[catKey].forEach(function (p) {
-        createCard(p.rel, p.folderName, p.cardName, p.coverImg, p.images, p.infoUrl, p.infoType);
+        createCard(p.rel, p.folderName, p.cardName, p.coverImg, p.images, p.infoUrl, p.infoType, p.price, p.spec);
       });
       const target = '#' + cat.hash;
       if (push !== false && window.location.hash !== target) {
@@ -697,8 +756,21 @@
               ? folderName.split('-').slice(1).join('-')
               : folderName;
 
+            // 粗陶花盆：从 info.txt 读取「价格」行与规格行（展厅卡片吊牌 + 详情价格条用）
+            let clayPrice = '', claySpec = '';
+            if (catKey === 'clay' && infoUrl) {
+              try {
+                const ires = await fetch(`${infoUrl}?t=${CACHE_STAMP}`);
+                const itext = new TextDecoder('utf-8').decode(await ires.arrayBuffer());
+                const pm = itext.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
+                if (pm) clayPrice = pm[1].trim().replace(/^¥\s*/, '');
+                const sm = itext.match(/^[ \t]*(口径[^\n]*)$/m);
+                if (sm) claySpec = sm[1].trim().replace(/，/g, ' · ');
+              } catch (e) { /* 读不到就不显示价格，不影响其他 */ }
+            }
+
             if (coverImg) {
-              productsByCat[catKey].push({ folderName: folderName, rel: rel, cardName: cardName, coverImg: coverImg, images: images, infoUrl: infoUrl, infoType: infoType });
+              productsByCat[catKey].push({ folderName: folderName, rel: rel, cardName: cardName, coverImg: coverImg, images: images, infoUrl: infoUrl, infoType: infoType, price: clayPrice, spec: claySpec });
             }
           }
         }
@@ -715,15 +787,23 @@
       }
     }
     
-    function createCard(rel, folderName, cardName, coverUrl, allImages, infoUrl, infoType) {
+    function createCard(rel, folderName, cardName, coverUrl, allImages, infoUrl, infoType, price, spec) {
       const gallery = document.getElementById('gallery');
       const card = document.createElement('div');
-      card.className = 'product-card';
-      
-      card.innerHTML = `
+      const isClay = currentCat === 'clay';
+      card.className = isClay ? 'product-card clay-card' : 'product-card';
+
+      if (isClay) {
+        card.innerHTML = `
+        <div class="clay-pic"><img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">${price ? `<span class="clay-tag">¥${escapeHtml(price)}</span>` : ''}</div>
+        <div class="product-info"><h3 class="serif">${cardName}</h3>${spec ? `<div class="clay-spec">${escapeHtml(spec)}</div>` : ''}</div>
+      `;
+      } else {
+        card.innerHTML = `
         <img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">
         <div class="product-info"><h3 class="serif">${cardName}</h3></div>
       `;
+      }
       
       // 绑定滑动进入屏幕预加载
       if (allImages && allImages.length > 0) {
@@ -759,21 +839,37 @@
       let docTitle = fallbackName;
       let bodyHTML = '';
       let isSold = false;
-      
+      const isClay = rel.indexOf(CATS.clay.folder + '/') === 0;
+      let clayPrice = '', claySpec = '';
+
       if (infoUrl) {
         try {
           const res = await fetch(`${infoUrl}?t=${CACHE_STAMP}`);
           const buffer = await res.arrayBuffer();
           const text = new TextDecoder('utf-8').decode(buffer);
-          
+
           isSold = text.includes('已结缘');
           const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
           const rawTitle = lines[0].replace(/^#+\s*/, '').replace(/[*_~`]/g, '').trim();
           if (rawTitle) docTitle = rawTitle;
-          
-          const bodyText = lines.slice(1).join('\n').trim();
-          
-          if (infoType === 'md') {
+
+          let bodyText = lines.slice(1).join('\n').trim();
+
+          // 粗陶详情：价格从 txt「价格」行进价格条；正文剔除价格行与【交易必读】段（告示牌已在展厅顶部展示）
+          if (isClay) {
+            const pm = text.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
+            if (pm) clayPrice = pm[1].trim().replace(/^¥\s*/, '');
+            const sm = text.match(/^[ \t]*(口径[^\n]*)$/m);
+            if (sm) claySpec = sm[1].trim().replace(/，/g, ' · ');
+            bodyText = bodyText.replace(/^[ \t]*价格[:：]?.*$/m, '');
+            const tIdx = bodyText.indexOf('【交易必读】');
+            if (tIdx >= 0) bodyText = bodyText.slice(0, tIdx);
+            bodyText = bodyText.trim();
+          }
+
+          if (!bodyText) {
+            bodyHTML = '';
+          } else if (infoType === 'md') {
             bodyHTML = `<div class="md-body">${renderMarkdown(bodyText)}</div>`;
           } else {
             bodyHTML = `<div class="txt-body">${escapeHtml(bodyText)}</div>`;
@@ -802,7 +898,22 @@
         restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
       }
       
-      dynamicBox.innerHTML = `
+      dynamicBox.innerHTML = isClay ? `
+        <div class="modal-content-dynamic">
+          <div class="detail-hero-wrapper">
+            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
+            ${stampHero}
+          </div>
+          <div class="clay-price-bar">
+            ${clayPrice ? `<span class="clay-p">¥${escapeHtml(clayPrice)}</span>` : ''}
+            <span class="clay-s">${escapeHtml(docTitle)}${claySpec ? ' · ' + escapeHtml(claySpec) : ''}</span>
+            ${wechatBtnHTML}
+          </div>
+          ${bodyHTML ? `<div class="detail-text-card">${bodyHTML}</div>` : ''}
+          <div class="detail-images-list">${restImgsHTML}</div>
+          <div class="end-of-content">· 观止 ·</div>
+        </div>
+      ` : `
         <div class="modal-content-dynamic">
           <div class="detail-hero-wrapper">
             ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
