@@ -180,24 +180,31 @@
     .close-btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     .modal-content-dynamic { width: 100%; animation: fadeIn 0.4s; }
     
-    /* ===== 详情页 Hero ===== */
-    .detail-hero-wrapper { 
-      position: relative; width: 100%; height: auto; background: #000; 
-      font-size: 0; line-height: 0; display: block;
+    /* ===== 详情页新版（展陈定稿）：首图与下图同宽同级 · 毛玻璃卡吸顶收缩 · 按图定框零跳变 ===== */
+    /* 变量作用域=模态框（详情页只存在于模态内）；弧线同心定理见 .glass.pinned .gbtn 处 */
+    #product-modal {
+      --g-pad:13px 24px; --g-gap:14px; --g-name:19px; --g-price:20px; --g-price-s:12px;
+      --g-btn:12.5px; --g-btn-pad:9px 17px; --g-hint:11.5px; --g-sold:10.5px; --g-bh:36px;
+      --g-mt:-64px; --g-mx:12px; --g-top:12px;
+      --g-h:60px;
+      /* 吸顶细长条：品名在收缩态隐去，只留价格+微信；
+         弧心重合公式：「上下/右内边距 + 1px边 + 按钮半径 = 玻璃半径(=高/2)」桌面 7+1+13=21 ✓ */
+      --g-hm:42px; --g-mini-w:210px;
+      --g-mpv:7px; --g-mpl:16px; --g-mgap:10px;
+      --g-mprice:15px; --g-mbtn:11px; --g-mbtn-pad:0 12px; --g-msold:9px;
+      --stream-gap:22px; --stream-top:26px; --prose-top:18px;
     }
-    .detail-hero-wrapper img { 
-      width: auto; max-width: 100%; height: auto; display: block; 
-      margin: 0 auto; opacity: 0.95; cursor: zoom-in; 
-    }
-    /* 首图限高收缩：竖版（及超宽图）在电脑端收缩进一屏——首图+悬浮条+正文首行同框；
-       宽高比不变、居中两侧留黑；横图不触发（本来就没视口高） */
-    @media (min-width: 769px) {
-      .detail-hero-wrapper img { max-height: calc(100vh - 150px); }
-    }
-    /* 移动端兜底：防极端长竖图把悬浮条顶出首屏（常规 3:4 竖图/方图不触发） */
-    @media (max-width: 768px) {
-      .detail-hero-wrapper img { max-height: 82vh; }
-    }
+    .dstage { max-width: 880px; margin: 0 auto; padding: 0 0 90px; }
+    /* 首图：与下图完全同级——同宽、各自按原图宽高比成框，绝不裁切 */
+    .dhero { position: relative; background: #000; }
+    /* 图框：占位策略核心——开页即按图片真实宽高比占位，图片何时到、以何顺序到都不跳版 */
+    .dframe { position: relative; width: 100%; background: #0d0a07; overflow: hidden; }
+    .dframe::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, rgba(201,160,106,.045) 50%, transparent 80%); background-size: 200% 100%; animation: dsweep 2.6s linear infinite; pointer-events: none; }
+    .dframe.done::after { display: none; }
+    @keyframes dsweep { from { background-position: 200% 0; } to { background-position: -100% 0; } }
+    /* contain：任何情况下都不裁切图片；框型=原图宽高比时恰好满框、零留白 */
+    .dframe img { width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .55s ease; cursor: zoom-in; display: block; }
+    .dframe img.in { opacity: 1; }
     
     /* ===== 独立透明 PNG 印章 ===== */
     img.sold-stamp-hero {
@@ -218,26 +225,73 @@
       }
     }
     
-    /* ===== 详情悬浮条（详情页唯一悬浮卡片：品名+价格+微信按钮）===== */
-    .detail-bar { 
-      display: flex; flex-wrap: wrap; align-items: center; gap: 16px; 
-      padding: 16px 22px; background: var(--card-bg); 
-      border: 1px solid var(--border-color); border-radius: 6px; 
-      margin: -40px 24px 36px; position: relative; z-index: 3; 
-      box-shadow: 0 10px 36px rgba(0,0,0,.55); 
-    }
-    .detail-bar .d-price { font-size: 30px; color: var(--gold-l); font-family: var(--serif); line-height: 1; }
-    .detail-bar .d-name { font-size: 14px; color: var(--text-light); }
-    .detail-bar .btn-wechat { margin-left: auto; }
-    @media (max-width: 768px) { 
-      .detail-bar { margin: -24px 12px 28px; padding: 12px 14px; gap: 10px; }
-      .detail-bar .d-price { font-size: 24px; }
-      .detail-bar .d-name { font-size: 12.5px; }
+    /* ===== 毛玻璃卡：品名 + 价格 + 微信按钮 =====
+       .gslot 卡槽：sticky 吸顶 + 布局锚点（高度恒为整卡高，收缩时正文零跳版）
+       .glass 卡片：绝对定位于槽内；初始满宽、骑首图内下缘；吸顶后收缩为右上角细长条 */
+    .gslot { position: sticky; top: var(--g-top); z-index: 5; margin: var(--g-mt) var(--g-mx) 0; height: var(--g-h); pointer-events: none; }
+    .glass { position: absolute; top: 0; right: 0; width: 100%; height: var(--g-h); pointer-events: auto;
+      display: flex; align-items: center; gap: var(--g-gap); padding: var(--g-pad);
+      background: linear-gradient(180deg, rgba(32,26,18,.66), rgba(15,11,7,.80));
+      backdrop-filter: blur(22px) saturate(1.35); -webkit-backdrop-filter: blur(22px) saturate(1.35);
+      border: 1px solid rgba(255,238,214,.16); border-radius: 16px; white-space: nowrap; overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,240,220,.20), inset 0 -1px 0 rgba(0,0,0,.32),
+        0 10px 30px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.28);
+      transition: width .5s cubic-bezier(.22,1,.36,1), height .4s cubic-bezier(.22,1,.36,1),
+        padding .4s cubic-bezier(.22,1,.36,1), border-radius .4s cubic-bezier(.22,1,.36,1),
+        gap .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease; }
+    /* 吸顶态：收缩为右上角细长条（右对齐，宽度过渡即"缩小"动画） */
+    .glass.pinned { width: var(--g-mini-w); height: var(--g-hm); padding: var(--g-mpv) var(--g-mpv) var(--g-mpv) var(--g-mpl); gap: var(--g-mgap); border-radius: 999px;
+      box-shadow: inset 0 1px 0 rgba(255,240,220,.16), inset 0 -1px 0 rgba(0,0,0,.30),
+        0 8px 22px rgba(0,0,0,.50), 0 2px 6px rgba(0,0,0,.30); }
+    .glass h1 { font-family: var(--serif); font-size: var(--g-name); font-weight: 600; letter-spacing: .04em; color: var(--text-main); flex: 0 1 auto; min-width: 0; }
+    /* 收缩态隐去品名：常驻条只留价格 + 微信（身份由页面本身承载） */
+    .glass.pinned h1 { display: none; }
+    .glass .sold-tag { flex: 0 0 auto; font-family: var(--serif); font-size: var(--g-sold); color: #c99a63; border: 1px solid rgba(201,160,106,.45); background: rgba(201,160,106,.10); padding: 2px 7px; border-radius: 4px; letter-spacing: .12em; }
+    .glass.pinned .sold-tag { font-size: var(--g-msold); padding: 1px 5px; }
+    .glass .price { flex: 0 0 auto; font-family: var(--serif); font-size: var(--g-price); color: var(--gold-l); line-height: 1; transition: font-size .4s; }
+    .glass.pinned .price { font-size: var(--g-mprice); }
+    .glass .price small { font-size: var(--g-price-s); color: var(--gold); margin-right: 1px; }
+
+    /* ===== 微信按钮（毛玻璃卡内）===== */
+    .gbtn { flex: 0 0 auto; margin-left: auto; height: var(--g-bh); border: 1px solid var(--gold); background: rgba(201,160,106,.12); color: var(--gold-l);
+      font-size: var(--g-btn); padding: var(--g-btn-pad); border-radius: 6px; cursor: pointer; letter-spacing: .04em; white-space: nowrap;
+      /* 收缩动画与玻璃卡同步：高/内边距/圆角同曲线同时长，悬停色 .25s */
+      transition: height .4s cubic-bezier(.22,1,.36,1), padding .4s cubic-bezier(.22,1,.36,1),
+        border-radius .4s cubic-bezier(.22,1,.36,1), background .25s, color .25s; }
+    .gbtn:hover { background: var(--gold); color: #241a0c; }
+    .gbtn .hint { color: rgba(201,160,106,.55); font-size: var(--g-hint); margin-left: 5px; }
+    .gbtn:hover .hint { color: rgba(36,26,12,.65); }
+    .gbtn.sold { border-color: #5a4a33; color: var(--text-light); background: transparent; }
+    .gbtn.sold:hover { background: #3a2f20; color: var(--text-main); }
+    .gbtn.sold .hint { color: rgba(201,160,106,.45); }
+    /* 细长条态：按钮收紧为胶囊，且与玻璃条外弧严格同心
+       —— 高度 = 玻璃高 - 2×(1px边+内边距) = 2×按钮半径（正胶囊）；
+          半径 = 玻璃半径(高/2) - 1px边 - 内边距（弧心重合，弧间距恒定=内边距，直边与弧角等宽） */
+    .glass.pinned .gbtn { padding: var(--g-mbtn-pad); font-size: var(--g-mbtn);
+      height: calc(var(--g-hm) - 2px - 2 * var(--g-mpv));
+      border-radius: calc(var(--g-hm) / 2 - 1px - var(--g-mpv)); }
+    .glass.pinned .gbtn .hint { display: none; }
+    /* 细长条态隐藏已售徽标（按钮文字已含"已售出"，避免重复）——只针对徽章，不碰 .gbtn.sold */
+    .glass.pinned .sold-tag { display: none; }
+    @media (max-width: 768px) {
+      #product-modal {
+        --g-pad:9px 12px; --g-gap:8px; --g-name:14px; --g-price:15px; --g-price-s:10px;
+        --g-btn:10.5px; --g-btn-pad:6px 10px; --g-hint:9.5px; --g-sold:9px; --g-bh:28px;
+        --g-mt:-52px; --g-mx:10px; --g-top:10px;
+        --g-h:50px;
+        --g-hm:38px; --g-mini-w:180px;
+        --g-mpv:6px; --g-mpl:13px; --g-mgap:7px;
+        --g-mprice:13px; --g-mbtn:10px; --g-mbtn-pad:0 11px; --g-msold:8.5px;
+        --stream-gap:14px; --stream-top:20px; --prose-top:14px;
+      }
+      /* 手机细长条更激进：隐去品名，只留价格+微信（身份由页面本身承载） */
+      .glass.pinned h1 { display: none; }
     }
     
-    /* ===== 详情正文（无卡片，与剩余图片列表同一层级平铺）===== */
-    .detail-plain { max-width: 800px; margin: 6px auto 44px; padding: 0 24px; position: relative; z-index: 1; }
-    .detail-plain .md-body, .detail-plain .txt-body { margin-bottom: 0; }
+    /* ===== 详情正文（无卡片，窄栏，与剩余图片列表同一层级平铺）===== */
+    .prose { max-width: 640px; margin: var(--prose-top) auto 0; padding: 0 34px; position: relative; z-index: 1; }
+    .prose .md-body, .prose .txt-body { margin-bottom: 0; }
+    @media (max-width: 768px) { .prose { padding: 0 20px; } }
     
     /* ===== Markdown 顶级中文排印标准 ===== */
     .md-body { color: var(--text-body); font-size: 1.05rem; line-height: 2.1; font-family: var(--serif); font-weight: 400; margin-bottom: 30px; }
@@ -262,44 +316,13 @@
     .md-body blockquote { border-left: 3px solid var(--accent-color); margin: 1.5em 0; padding: 15px 20px; background: rgba(212, 163, 115, 0.08); border-radius: 0 4px 4px 0; color: var(--text-main); font-style: italic; text-align: justify; text-justify: inter-character; }
     
     .txt-body { color: var(--text-body); line-height: 2.1; white-space: pre-line; font-size: 1.05rem; text-align: justify; text-justify: inter-character; line-break: strict; font-family: var(--serif); }
-    
-    /* ===== 按钮区域逻辑优化 ===== */
-    .btn-row { display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; flex-wrap: nowrap; gap: 15px; }
-    
-    /* 正常按钮：强烈的销售结缘属性 */
-    .btn-wechat { 
-      padding: 12px 25px; background-color: var(--accent-color); color: #121212; 
-      font-weight: 600; border-radius: 2px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; 
-    }
-    .btn-wechat:hover { background-color: #e5b686; }
 
-    /* 按钮内的灰色辅助提示：主信息醒目、提示退后 */
-    .btn-wechat .hint { color: rgba(18,18,18,.45); font-size: .85em; margin-left: .4em; font-weight: 400; }
-    .btn-sold-status .hint { color: rgba(212,163,115,.6); font-size: .85em; margin-left: .4em; font-weight: 400; }
-    
-    /* 已结缘按钮：缩小体积 + 中式双线典雅边框 */
-    .btn-sold-status {
-      padding: 6px 18px; 
-      font-size: 0.95rem; 
-      background-color: transparent; 
-      color: var(--accent-color);
-      border: 3px double var(--accent-color); 
-      border-radius: 6px; 
-      opacity: 0.9;
-      letter-spacing: 1px;
-    }
-    .btn-sold-status:hover {
-      background-color: rgba(212, 163, 115, 0.1); opacity: 1;
-    }
-    
-    @media (max-width: 400px) {
-      .btn-wechat { padding: 10px 15px; font-size: 0.9rem; }
-      .btn-sold-status { padding: 5px 14px; font-size: 0.85rem; }
-    }
-    
-    /* ===== 详情图列表与底部标识 ===== */
-    .detail-images-list { max-width: 800px; margin: 0 auto; padding: 0 20px 0 20px; display: block; }
-    .detail-images-list img { width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 30px; display: block; }
+    /* ===== 详情图流：与首图同宽同层级，间距收紧，无页码 ===== */
+    .dstream { margin-top: var(--stream-top); padding: 0; display: flex; flex-direction: column; gap: var(--stream-gap); }
+    .dstream .shot { position: relative; }
+    /* 滚动淡入 */
+    .rv { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s cubic-bezier(.22,.8,.3,1); }
+    .rv.in { opacity: 1; transform: none; }
 
     /* ── 粗陶花盆独立展厅：交易必读告示牌（方案一） ── */
     .clay-notice { background: #3a2c18; border: 1px solid #6b4f24; border-left: 6px solid var(--gold); border-radius: 4px; padding: 26px 26px 22px; margin: 10px 0 46px; }
@@ -476,6 +499,87 @@
     const rootRawBase = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main`;
     const stampFilename = 'yinzhang.png';
     const stampCDNUrl = `${rootRawBase}/${stampFilename}`;
+
+    /*IMG_DIMS_BEGIN*/ /* 图片宽高表：「按图定框」占位策略的基石——开页即按原图比例占位，零跳变/零裁切。
+       由 gen_dims.py 扫描 push-package/products 生成；新增产品后重跑该脚本更新此块（标记之间整体替换）。
+       查不到的产品（如用户手动加文件夹未跑脚本）退化为 4:3 占位，图片加载后按真实尺寸自校正。 */
+    const IMG_DIMS = {
+  "粗陶花盆/01-国际盆/IMG_20261018_171417-1.jpg":[1600,1200],
+  "粗陶花盆/01-国际盆/IMG_20261018_171504-5.jpg":[1600,1200],
+  "粗陶花盆/01-国际盆/IMG_20261018_171532-4.jpg":[1600,1200],
+  "粗陶花盆/01-国际盆/IMG_20261018_171710-0.jpg":[1200,1600],
+  "粗陶花盆/01-国际盆/IMG_20261018_171722-2.jpg":[1200,1600],
+  "粗陶花盆/01-国际盆/Top-down_view_of_terracotta_pot_2K_20261019223826-3.jpg":[1600,1194],
+  "粗陶花盆/02-大号国际盆/1748490061678-5.jpg":[1600,1200],
+  "粗陶花盆/02-大号国际盆/1748490061683-4.jpg":[1600,1143],
+  "粗陶花盆/02-大号国际盆/DSC00169-1-1.jpg":[1600,1600],
+  "粗陶花盆/02-大号国际盆/DSC00174-1-2.jpg":[1600,1600],
+  "粗陶花盆/02-大号国际盆/DSC00175-1-3.jpg":[1600,1600],
+  "粗陶花盆/02-大号国际盆/Woman_carrying_heavy_flowerpot_2K_20261023234257-0.jpg":[1194,1600],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00090-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00090-1尺寸.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00091-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00092-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00093-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00095-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00098-1.jpg":[1080,1080],
+  "粗陶花盆/03-鱼鳞纹国际盆/DSC00101-1.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00208-1.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00209-1.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00214-1尺寸.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00216-1.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00218-1.jpg":[1080,1080],
+  "粗陶花盆/04-藤纹国际盆/DSC00219-1.jpg":[1080,1080],
+  "粗陶花盆/05-大蛮腰/DSC08382-1.jpg":[1600,1600],
+  "粗陶花盆/05-大蛮腰/DSC08382-1b.jpg":[1600,1600],
+  "粗陶花盆/05-大蛮腰/DSC08383-1.jpg":[1600,1600],
+  "粗陶花盆/05-大蛮腰/DSC08386-1.jpg":[1600,1600],
+  "粗陶花盆/06-小蛮腰/DSC08387-1.jpg":[1600,1600],
+  "粗陶花盆/06-小蛮腰/DSC08388-1.jpg":[1600,1600],
+  "粗陶花盆/06-小蛮腰/DSC08389-1.jpg":[1600,1600],
+  "粗陶花盆/06-小蛮腰/DSC08390-1.jpg":[1600,1600],
+  "粗陶花盆/07-手工陶盆/DSC08343-1.jpg":[1600,1600],
+  "粗陶花盆/07-手工陶盆/DSC08344-1.jpg":[1600,1600],
+  "粗陶花盆/07-手工陶盆/DSC08345-1.jpg":[1600,1600],
+  "细陶茶器/01-粗陶柴烧坛香壶/_DSC4438-1.jpg":[1600,1067],
+  "细陶茶器/01-粗陶柴烧坛香壶/_DSC6263-1.jpg":[1600,1067],
+  "细陶茶器/01-粗陶柴烧坛香壶/_DSC6267-1.jpg":[1600,900],
+  "细陶茶器/02-主人杯/_DSC9190-180-80.webp":[1600,1195],
+  "细陶茶器/02-主人杯/_DSC9192-180-80.webp":[1600,712],
+  "细陶茶器/02-主人杯/_DSC9194-180-80.webp":[1600,1200],
+  "细陶茶器/02-主人杯/_DSC9195-180-80.webp":[1600,1067],
+  "细陶茶器/02-主人杯/_DSC9197-180-80.webp":[1600,1073],
+  "细陶茶器/02-主人杯/_DSC9198-180-80.webp":[1600,1073],
+  "细陶茶器/03-柴烧西施/01.jpg":[1600,900],
+  "细陶茶器/03-柴烧西施/02.jpg":[1599,1200],
+  "细陶茶器/03-柴烧西施/03.jpg":[1600,1200],
+  "细陶茶器/03-柴烧西施/04.jpg":[1600,899],
+  "细陶茶器/03-柴烧西施/05.jpg":[1600,900],
+  "细陶茶器/03-柴烧西施/06.jpg":[1600,1200],
+  "细陶茶器/03-柴烧西施/小西施场景模特图1_01.jpg":[1600,715],
+  "细陶茶器/03-柴烧西施/小西施场景模特图1_02.jpg":[1600,714],
+  "细陶茶器/03-柴烧西施/小西施场景模特图1_03.jpg":[1600,714],
+  "细陶茶器/04-柴烧仿古壶/_DSC8924.JPG":[1600,1066],
+  "细陶茶器/04-柴烧仿古壶/_DSC8927.JPG":[1600,1066],
+  "细陶茶器/04-柴烧仿古壶/_DSC8928.JPG":[1600,1066],
+  "细陶茶器/05-坛香壶/_DSC9222-1.jpg":[1080,608],
+  "细陶茶器/05-坛香壶/_DSC9223-1.jpg":[1080,608],
+  "细陶茶器/05-坛香壶/_DSC9225-1.jpg":[1080,607],
+  "细陶茶器/05-坛香壶/_DSC9227-1.jpg":[1080,781],
+  "细陶茶器/05-坛香壶/_DSC9229-1.jpg":[1080,754],
+  "细陶茶器/05-坛香壶/_DSC9230-1.jpg":[1080,413],
+  "细陶茶器/05-坛香壶/_DSC9232-1.jpg":[1080,568],
+  "细陶茶器/05-坛香壶/_DSC9235-1.jpg":[1080,1080],
+  "细陶茶器/05-坛香壶/_DSC9241-1.jpg":[1080,347],
+  "细陶茶器/05-坛香壶/img01.jpg":[1080,498],
+  "细陶茶器/06-绞泥酒坛/01.jpg":[1600,1195],
+  "细陶茶器/06-绞泥酒坛/02.jpg":[1200,1600],
+  "细陶茶器/06-绞泥酒坛/03.jpg":[1195,1600],
+  "细陶茶器/06-绞泥酒坛/04.jpg":[1193,1600],
+  "细陶茶器/06-绞泥酒坛/05.jpg":[1200,1600],
+  "细陶茶器/06-绞泥酒坛/06.jpg":[1200,1600],
+};
+    /*IMG_DIMS_END*/
 
     // ─────────────────────────────────────────
     // 双入口分类体系（窑门双开）
@@ -872,39 +976,42 @@
       const dynamicBox = document.getElementById('modal-dynamic-box');
 
       modal.style.display = 'block';
+      modal.scrollTop = 0; // 重置滚动：否则上次的吸顶态会在打开瞬间成立
       document.body.style.overflow = 'hidden';
 
-      const isClay = rel.indexOf(CATS.clay.folder + '/') === 0;
-      const firstImgSrc = images.length > 0 ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[0])}?t=${CACHE_STAMP}` : '';
-
-      let restImgsHTML = '';
-      for (let i = 1; i < images.length; i++) {
-        const src = `${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`;
-        restImgsHTML += `<img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)">`;
-      }
+      // 按图定框：尺寸表命中→开页即按原图比例占位；未命中→4:3 退化，加载后自校正
+      const frame = (f, lazy) => {
+        const d = IMG_DIMS[rel + '/' + f] || [4, 3];
+        return `<div class="dframe" style="aspect-ratio:${d[0]}/${d[1]}"><img src="${rawBase}/${encRel(rel)}/${encodeURIComponent(f)}?t=${CACHE_STAMP}"${lazy ? ' loading="lazy"' : ''} decoding="async" onclick="openLightbox(this.src)" alt="${escapeHtml(fallbackName)}"></div>`;
+      };
 
       // 第一步：立即渲染骨架——图片马上开始加载，不等信息文本（txt 网络挂起时不挡图）
-      // 详情页结构（细陶/粗陶统一）：首图（竖图限高收缩）→ 悬浮条（唯一卡片：品名+价格+微信）→ 正文（无卡片）→ 剩余图片
+      // 结构（细陶/粗陶统一）：首图 → 毛玻璃卡（吸顶收缩）→ 正文 → 剩余图片流 → 观止
       dynamicBox.innerHTML = `
         <div class="modal-content-dynamic">
-          <div class="detail-hero-wrapper" id="m-hero">
-            ${firstImgSrc ? `<img src="${firstImgSrc}" decoding="async" onclick="openLightbox(this.src)">` : ''}
+          <div class="dstage">
+            <div class="dhero" id="d-hero">${images.length ? frame(images[0]) : ''}</div>
+            <div class="gslot">
+              <div class="glass" id="d-glass">
+                <h1>${escapeHtml(fallbackName)}</h1>
+                <button class="gbtn" onclick="copyWechat()">微信号 CJQ678<span class="hint">（点击复制）</span></button>
+              </div>
+            </div>
+            <div class="prose" id="d-text" style="display:none"></div>
+            <div class="dstream">
+              ${images.slice(1).map(f => `
+                <div class="shot rv">${frame(f, true)}</div>`).join('')}
+            </div>
+            <div class="end-of-content">· 观止 ·</div>
           </div>
-          <div class="detail-bar">
-            ${isClay ? '<span class="d-price" id="m-price"></span>' : ''}
-            <span class="d-name" id="m-name">${escapeHtml(fallbackName)}</span>
-            <span id="m-btn" style="display:contents"></span>
-          </div>
-          <div class="detail-plain" id="m-text" style="display:none"></div>
-          <div class="detail-images-list">${restImgsHTML}</div>
-          <div class="end-of-content">· 观止 ·</div>
         </div>
       `;
+      bindDetailFrames();
 
       // 后台静默预拉剩余图片（看完文字下滑时秒渲染）
       setTimeout(() => {
         for (let i = 1; i < images.length; i++) {
-           preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
+          preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
         }
       }, 400);
 
@@ -912,7 +1019,7 @@
       let docTitle = fallbackName;
       let bodyHTML = '';
       let isSold = false;
-      let clayPrice = '', claySpec = '';
+      let price = '';
 
       if (infoUrl) {
         try {
@@ -923,21 +1030,17 @@
           isSold = text.includes('已结缘');
           const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
           const rawTitle = lines[0].replace(/^#+\s*/, '').replace(/[*_~`]/g, '').trim();
-          if (rawTitle) docTitle = rawTitle;
+          // 首行若是「价格」行（介绍全文只有一行价格的产品），标题回退产品名——避免把价格当品名
+          if (rawTitle && !/^[ \t]*价格[:：]?/.test(rawTitle)) docTitle = rawTitle;
 
           let bodyText = lines.slice(1).join('\n').trim();
-
-          // 粗陶详情：价格从 txt「价格」行进价格条；正文剔除价格行与【交易必读】段（告示牌已在展厅顶部展示）
-          if (isClay) {
-            const pm = text.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
-            if (pm) clayPrice = pm[1].trim().replace(/^¥\s*/, '');
-            const sm = text.match(/^[ \t]*(口径[^\n]*)$/m);
-            if (sm) claySpec = sm[1].trim().replace(/，/g, ' · ');
-            bodyText = bodyText.replace(/^[ \t]*价格[:：]?.*$/m, '');
-            const tIdx = bodyText.indexOf('【交易必读】');
-            if (tIdx >= 0) bodyText = bodyText.slice(0, tIdx);
-            bodyText = bodyText.trim();
-          }
+          const pm = text.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
+          if (pm) price = pm[1].trim().replace(/^¥\s*/, '');
+          bodyText = bodyText.replace(/^[ \t]*价格[:：]?.*$/m, '');
+          // 剔除【交易必读】段（粗陶告示牌已在展厅顶部展示）与【已结缘】标记（印章+已售按钮已表达）
+          const tIdx = bodyText.indexOf('【交易必读】');
+          if (tIdx >= 0) bodyText = bodyText.slice(0, tIdx);
+          bodyText = bodyText.replace(/【已结缘】/g, '').trim();
 
           if (!bodyText) {
             bodyHTML = '';
@@ -950,33 +1053,78 @@
           bodyHTML = '<div class="txt-body">（介绍读取失败，详见图片展示）</div>';
         }
       } else {
-        bodyHTML = '<div class="txt-body">（详见图片展示）</div>';
+        bodyHTML = '';
       }
 
       // 已切换到其他产品/关闭了详情，放弃回填
       if (currentModalFolder !== folderName) return;
 
-      const wechatBtnHTML = isSold
-        ? `<div class="btn-wechat btn-sold-status" onclick="copyWechat()">已售出 · 微信 CJQ678<span class="hint">（点击复制）</span></div>`
-        : `<div class="btn-wechat" onclick="copyWechat()">微信号 CJQ678<span class="hint">（点击复制）</span></div>`;
-      const stampHero = isSold ? `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">` : '';
-
-      const heroBox = document.getElementById('m-hero');
-      if (heroBox && stampHero) heroBox.insertAdjacentHTML('beforeend', stampHero);
-      const btnBox = document.getElementById('m-btn');
-      if (btnBox) btnBox.innerHTML = wechatBtnHTML;
-
-      if (isClay) {
-        const priceEl = document.getElementById('m-price');
-        if (priceEl) { if (clayPrice) priceEl.textContent = '¥' + clayPrice; else priceEl.remove(); }
+      // 回填毛玻璃卡：品名 / 已售徽标 / 价格 / 微信按钮（卡片高度固定，内容变化零跳版）
+      const glass = document.getElementById('d-glass');
+      if (glass) {
+        const h1 = glass.querySelector('h1');
+        if (h1) h1.textContent = docTitle;
+        const btn = glass.querySelector('.gbtn');
+        if (isSold && btn) {
+          btn.classList.add('sold');
+          btn.innerHTML = '已售出 · 微信 CJQ678<span class="hint">（点击复制）</span>';
+          const tag = document.createElement('span');
+          tag.className = 'sold-tag';
+          tag.textContent = '已售出';
+          glass.insertBefore(tag, glass.firstChild);
+        }
+        if (price && btn) {
+          const pe = document.createElement('span');
+          pe.className = 'price';
+          pe.innerHTML = '<small>¥</small>' + escapeHtml(price);
+          glass.insertBefore(pe, btn);
+        }
       }
-      const nameEl = document.getElementById('m-name');
-      if (nameEl) nameEl.textContent = docTitle + (isClay && claySpec ? ' · ' + claySpec : '');
-      const textEl = document.getElementById('m-text');
+      // 已结缘印章：叠在首图右上角（原站机制保留）
+      if (isSold) {
+        const heroBox = document.getElementById('d-hero');
+        if (heroBox) heroBox.insertAdjacentHTML('beforeend',
+          `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">`);
+      }
+      const textEl = document.getElementById('d-text');
       if (textEl) {
         if (bodyHTML) { textEl.innerHTML = bodyHTML; textEl.style.display = ''; }
         else textEl.remove();
       }
+      syncPin();
+    }
+
+    /* 详情图框：加载渐显 + 扫描显现 + 按真实宽高比自校正框型（尺寸表未命中也不裁切、不留边） */
+    function bindDetailFrames() {
+      const modal = document.getElementById('product-modal');
+      modal.querySelectorAll('.dframe img').forEach(img => {
+        const done = () => {
+          img.classList.add('in');
+          const frame = img.parentElement;
+          frame.classList.add('done');
+          const ar = img.naturalWidth + '/' + img.naturalHeight;
+          if (frame.style.aspectRatio !== ar) frame.style.aspectRatio = ar;
+        };
+        if (img.complete && img.naturalWidth) done();
+        else img.addEventListener('load', done, { once: true });
+      });
+      const io = new IntersectionObserver(es => {
+        es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: .12 });
+      modal.querySelectorAll('.rv').forEach(el => io.observe(el));
+    }
+
+    /* 吸顶收缩：卡槽触顶 → 卡片加 .pinned，CSS 过渡收缩为右上角细长条（模态容器内滚动） */
+    let pinRaf = false;
+    function syncPin() {
+      if (pinRaf) return;
+      pinRaf = true;
+      requestAnimationFrame(() => {
+        pinRaf = false;
+        const slot = document.querySelector('.gslot'), g = slot && slot.querySelector('.glass');
+        if (!g) return;
+        g.classList.toggle('pinned', slot.getBoundingClientRect().top <= 13);
+      });
     }
     
     function escapeHtml(str) {
@@ -985,22 +1133,27 @@
     
     function closeModal() {
       currentModalFolder = null;
-      document.getElementById('product-modal').style.display = 'none';
+      const modal = document.getElementById('product-modal');
+      modal.style.display = 'none';
+      modal.scrollTop = 0;
       document.body.style.overflow = 'auto';
-      
+
       const hideHomeStyle = document.getElementById('hide-home-style');
       if (hideHomeStyle) hideHomeStyle.remove();
-      
+
       if (currentCat) {
         openCategory(currentCat);
       } else if (window.location.hash) {
         window.history.pushState(null, '', window.location.pathname + window.location.search);
       }
     }
-    
+
     window.addEventListener('popstate', () => {
       routeByHash(false);
     });
+
+    /* 详情页吸顶收缩：监听模态容器的滚动（详情存在于模态内，窗口本身不滚动） */
+    document.getElementById('product-modal').addEventListener('scroll', syncPin, { passive: true });
     
     // ─────────────────────────────────────────
     // 终极灯箱缩放引擎
