@@ -171,6 +171,19 @@
     .product-card { cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; background: var(--card-bg); padding: 8px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
     .product-card img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; display: block; }
+
+    /* 1:1 占位框：进列表的瞬间所有产品都有等大方框 + 品名，缩略图到货后淡出揭图（全程零跳版） */
+    .pic { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: #14110d; border-radius: 2px; }
+    .pic-ph {
+      position: absolute; inset: 0; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16%; text-align: center;
+      font-size: clamp(12px, 3.4vw, 15px); line-height: 1.6; letter-spacing: .08em;
+      color: rgba(232, 222, 206, .52);
+      background: linear-gradient(135deg, #17140f, #100e0b);
+      transition: opacity .5s ease; pointer-events: none;
+    }
+    .pic.is-loaded .pic-ph { opacity: 0; }
     .product-info { padding: 12px 5px 5px 5px; text-align: center; }
     .product-info h3 { margin: 0; font-size: 1.05rem; color: var(--text-main); }
     
@@ -841,12 +854,81 @@
       }
     }
 
+    // ── 静态清单 products.json（发布时由 make_manifest.py 生成）──
+    // 原来靠 api.github.com 现场列目录：匿名每 IP 每小时只有 60 次额度，
+    // 进一次展厅要发 18 次请求（2 个分类 + 16 个产品文件夹），刷新几次就被限流，
+    // 列表直接空白且不报错。改读自己域名下这一个 6KB 文件：1 次请求、无限流、更快。
+    let manifestPromise = null;
+    function getManifest() {
+      if (!manifestPromise) {
+        manifestPromise = fetchWithTimeout('products.json?t=' + CACHE_STAMP, 6000)
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; });
+      }
+      return manifestPromise;
+    }
+
+    // 图片排序两步走：
+    // ① 「图片排序台」为这件产品存过顺序表 → 严格按表里的先后；
+    // ② 表里没列到的（比如刚加的新图）按文件名规则排在后面。
+    // 默认规则（老站规则，按文件名中的数字大小排）：
+    // 末尾带 "-序号" 的（-0/-1/-2…-10）按序号数字升序；无序号排其后按文件名；序号相同按文件名。
+    function defaultImgCmp(a, b) {
+      function tailNo(n) { var m = n.match(/-(\d+)(\.[^.]+)?$/); return m ? parseInt(m[1], 10) : NaN; }
+      var na = tailNo(a), nb = tailNo(b);
+      var aHas = !isNaN(na), bHas = !isNaN(nb);
+      if (aHas !== bHas) return aHas ? -1 : 1;
+      if (aHas && bHas && na !== nb) return na - nb;
+      return a < b ? -1 : (a > b ? 1 : 0);
+    }
+    function sortImages(rel, images) {
+      var list = IMG_ORDER[rel];
+      return (images || []).slice().sort(function (a, b) {
+        var ia = list ? list.indexOf(a) : -1;
+        var ib = list ? list.indexOf(b) : -1;
+        if (ia >= 0 && ib >= 0) return ia - ib;
+        if (ia >= 0) return -1;
+        if (ib >= 0) return 1;
+        return defaultImgCmp(a, b);
+      });
+    }
+
+    // 用清单直接铺数据层（零 API 请求）
+    function fillFromManifest(mf) {
+      (mf.cats || []).forEach(function (c) {
+        var bucket = productsByCat[c.key];
+        if (!bucket) return;
+        (c.products || []).forEach(function (p) {
+          var rel = c.folder + '/' + p.folder;
+          var images = sortImages(rel, p.images);
+          var thumb = p.thumb || images[0] || '';
+          if (!thumb) return;
+          bucket.push({
+            folderName: p.folder,
+            rel: rel,
+            cardName: p.name || (p.folder.indexOf('-') >= 0 ? p.folder.split('-').slice(1).join('-') : p.folder),
+            coverImg: rawBase + '/' + encRel(rel) + '/' + encodeURIComponent(thumb) + '?t=' + CACHE_STAMP,
+            images: images,
+            infoUrl: p.info ? rawBase + '/' + encRel(rel) + '/' + encodeURIComponent(p.info) : '',
+            infoType: p.info && /\.md$/i.test(p.info) ? 'md' : 'txt',
+            price: p.price || '',
+            spec: p.spec || ''
+          });
+        });
+      });
+    }
+
     async function initGallery() {
       const loadingElement = document.getElementById('loading');
       
       try {
+        // 先读静态清单（1 次请求，6KB）；读不到再退回 GitHub API 老路子
+        const mf = await getManifest();
+        if (mf && mf.cats && mf.cats.length) fillFromManifest(mf);
+
         // 第一层：两个分类文件夹；第二层：分类下的每个子文件夹即一件产品
         for (const catKey of CAT_ORDER) {
+          if (mf) break; // 清单已铺好，不再逐目录请求 GitHub API
           const catFolder = CATS[catKey].folder;
           let folders = [];
           try {
@@ -886,30 +968,8 @@
               }
             });
             
-            // 图片排序两步走：
-            // ① 若「图片排序台」为这件产品存过顺序表 → 严格按表里的先后；
-            // ② 表里没列到的（比如刚加的新图）按文件名规则排在后面。
-            // 默认规则（老站规则，按文件名中的数字大小排）：
-            // 末尾带 "-序号" 的（-0/-1/-2…-10）按序号数字升序；无序号排其后按文件名；
-            // 序号相同按文件名。例：国际盆 6 张 → -0,-1,-2,-3,-4,-5
-            function defaultImgCmp(a, b) {
-              function tailNo(n) { var m = n.match(/-(\d+)(\.[^.]+)?$/); return m ? parseInt(m[1], 10) : NaN; }
-              var na = tailNo(a), nb = tailNo(b);
-              var aHas = !isNaN(na), bHas = !isNaN(nb);
-              if (aHas !== bHas) return aHas ? -1 : 1;
-              if (aHas && bHas && na !== nb) return na - nb;
-              return a < b ? -1 : (a > b ? 1 : 0);
-            }
-            images.sort(function (a, b) {
-              var list = IMG_ORDER[rel];
-              var ia = list ? list.indexOf(a) : -1;
-              var ib = list ? list.indexOf(b) : -1;
-              if (ia >= 0 && ib >= 0) return ia - ib;
-              if (ia >= 0) return -1;
-              if (ib >= 0) return 1;
-              return defaultImgCmp(a, b);
-            });
-            
+            images = sortImages(rel, images);
+
             // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
             let finalThumb = thumbFilename;
             if (!finalThumb && images.length > 0) {
@@ -937,7 +997,7 @@
         updateDoorMetas();
         loadingElement.style.display = 'none';
         routeByHash(true);
-        loadClayMeta(); // 后台并行补价格吊牌，不阻塞首屏
+        if (!mf) loadClayMeta(); // 清单里已含价格吊牌；只有走 API 时才需要后台补
       } catch (error) {
         loadingElement.innerHTML = '⚠ 数据读取失败。';
         document.getElementById('meta-tea').textContent = '展厅数据读取失败';
@@ -1004,12 +1064,12 @@
 
       if (isClay) {
         card.innerHTML = `
-        <div class="clay-pic"><img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async"></div>
+        <div class="clay-pic pic"><span class="pic-ph">${cardName}</span><img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async" onload="this.parentNode.classList.add('is-loaded')" onerror="this.style.display='none'"></div>
         <div class="product-info"><h3 class="serif">${cardName}${price ? `<span class="clay-price-inline">¥${escapeHtml(tidyPrice(price))}</span>` : ''}</h3>${spec ? `<div class="clay-spec">${escapeHtml(spec)}</div>` : ''}</div>
       `;
       } else {
         card.innerHTML = `
-        <img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async">
+        <div class="pic"><span class="pic-ph">${cardName}</span><img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async" onload="this.parentNode.classList.add('is-loaded')" onerror="this.style.display='none'"></div>
         <div class="product-info"><h3 class="serif">${cardName}</h3></div>
       `;
       }

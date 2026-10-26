@@ -1,0 +1,276 @@
+{
+ "stamp": "2026-10-27T00:03",
+ "cats": [
+  {
+   "key": "tea",
+   "folder": "细陶茶器",
+   "products": [
+    {
+     "folder": "01-粗陶柴烧坛香壶",
+     "name": "粗陶柴烧坛香壶",
+     "images": [
+      "_DSC4438-1.jpg",
+      "_DSC6263-1.jpg",
+      "_DSC6267-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    },
+    {
+     "folder": "02-主人杯",
+     "name": "主人杯",
+     "images": [
+      "_DSC9190-180-80.webp",
+      "_DSC9192-180-80.webp",
+      "_DSC9194-180-80.webp",
+      "_DSC9195-180-80.webp",
+      "_DSC9197-180-80.webp",
+      "_DSC9198-180-80.webp"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    },
+    {
+     "folder": "03-柴烧西施",
+     "name": "柴烧西施",
+     "images": [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg",
+      "小西施场景模特图_01.jpg",
+      "小西施场景模特图_02.jpg",
+      "小西施场景模特图_03.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    },
+    {
+     "folder": "04-柴烧仿古壶",
+     "name": "柴烧仿古壶",
+     "images": [
+      "_DSC8924.JPG",
+      "_DSC8927.JPG",
+      "_DSC8928.JPG"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    },
+    {
+     "folder": "05-坛香壶",
+     "name": "坛香壶",
+     "images": [
+      "_DSC9222-1.jpg",
+      "_DSC9223-1.jpg",
+      "_DSC9225-1.jpg",
+      "_DSC9227-1.jpg",
+      "_DSC9229-1.jpg",
+      "_DSC9230-1.jpg",
+      "_DSC9232-1.jpg",
+      "_DSC9235-1.jpg",
+      "_DSC9241-1.jpg",
+      "img01.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    },
+    {
+     "folder": "06-绞泥酒坛",
+     "name": "绞泥酒坛",
+     "images": [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "04.jpg",
+      "05.jpg",
+      "06.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "",
+     "spec": ""
+    }
+   ]
+  },
+  {
+   "key": "clay",
+   "folder": "粗陶花盆",
+   "products": [
+    {
+     "folder": "01-国际盆",
+     "name": "国际盆",
+     "images": [
+      "IMG_20261018_171417-1.jpg",
+      "IMG_20261018_171504-5.jpg",
+      "IMG_20261018_171532-4.jpg",
+      "IMG_20261018_171710-0.jpg",
+      "IMG_20261018_171722-2.jpg",
+      "Top-down_view_of_terracotta_pot_2K_20261019223826-3.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "14.9",
+     "spec": "口径约21.5 · 高约18cm"
+    },
+    {
+     "folder": "02-大号国际盆",
+     "name": "大号国际盆",
+     "images": [
+      "1748490061678-5.jpg",
+      "1748490061683-4.jpg",
+      "DSC00169-1-1.jpg",
+      "DSC00174-1-2.jpg",
+      "DSC00175-1-3.jpg",
+      "Woman_carrying_heavy_flowerpot_2K_20261023234257-0.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "23.9",
+     "spec": "口径约25cm · 高约22cm"
+    },
+    {
+     "folder": "03-鱼鳞纹国际盆",
+     "name": "鱼鳞纹国际盆",
+     "images": [
+      "DSC00090-1.jpg",
+      "DSC00090-1尺寸.jpg",
+      "DSC00091-1.jpg",
+      "DSC00092-1.jpg",
+      "DSC00093-1.jpg",
+      "DSC00095-1.jpg",
+      "DSC00098-1.jpg",
+      "DSC00101-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "13.9",
+     "spec": ""
+    },
+    {
+     "folder": "04-藤纹国际盆",
+     "name": "藤纹国际盆",
+     "images": [
+      "DSC00208-1.jpg",
+      "DSC00209-1.jpg",
+      "DSC00214-1尺寸.jpg",
+      "DSC00216-1.jpg",
+      "DSC00218-1.jpg",
+      "DSC00219-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "14.9",
+     "spec": ""
+    },
+    {
+     "folder": "05-大蛮腰",
+     "name": "大蛮腰",
+     "images": [
+      "DSC08382-1.jpg",
+      "DSC08382-1b.jpg",
+      "DSC08383-1.jpg",
+      "DSC08386-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "13",
+     "spec": ""
+    },
+    {
+     "folder": "06-小蛮腰",
+     "name": "小蛮腰",
+     "images": [
+      "DSC08387-1.jpg",
+      "DSC08388-1.jpg",
+      "DSC08389-1.jpg",
+      "DSC08390-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "9.9",
+     "spec": ""
+    },
+    {
+     "folder": "07-手工陶盆",
+     "name": "手工陶盆",
+     "images": [
+      "DSC08343-1.jpg",
+      "DSC08344-1.jpg",
+      "DSC08345-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "99",
+     "spec": ""
+    },
+    {
+     "folder": "08-金钟盆",
+     "name": "金钟盆",
+     "images": [
+      "1748754814013.jpg",
+      "1748754814015.jpg",
+      "1748754814169.jpg",
+      "1748754814171.jpg",
+      "1748754814176.jpg",
+      "1748754814180.jpg",
+      "1748754814197-2.jpg",
+      "1748754814208-2.jpg",
+      "1748754814210-2.jpg",
+      "1748754814210-3.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "10.9起",
+     "spec": ""
+    },
+    {
+     "folder": "09-兰花盆",
+     "name": "兰花盆",
+     "images": [
+      "DSC06935-1.jpg",
+      "DSC06936-1.jpg",
+      "DSC06937-1.jpg",
+      "DSC06938-1.jpg",
+      "DSC06940-1.jpg",
+      "DSC06941-1.jpg",
+      "DSC06942-1.jpg",
+      "粗陶兰花盆_DSC0487-1.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "20起",
+     "spec": ""
+    },
+    {
+     "folder": "10-33口径平口",
+     "name": "33口径平口",
+     "images": [
+      "IMG_20250702_181412.jpg",
+      "IMG_20250702_181421.jpg",
+      "IMG_20250702_181739.jpg",
+      "IMG_20250702_181746.jpg",
+      "IMG_20250702_181803.jpg",
+      "IMG_20250702_181825.jpg",
+      "IMG_20250702_181856.jpg"
+     ],
+     "thumb": "thumb.webp",
+     "info": "info.txt",
+     "price": "35",
+     "spec": ""
+    }
+   ]
+  }
+ ]
+}
