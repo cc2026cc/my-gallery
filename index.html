@@ -591,6 +591,16 @@
       clay: { key: 'clay', folder: '粗陶花盆', hash: 'cat-clay', title: '花器' }
     };
     const CAT_ORDER = ['tea', 'clay'];
+
+    // ─────────────────────────────────────────
+    // 图片顺序覆盖表（由「图片排序台」自动写入，手改请保持格式）
+    // 键：分类文件夹/产品文件夹；值：该产品详情页图片的显示顺序（纯文件名数组）
+    // 表里没有的产品 = 沿用文件名排序；表里没列到的图片 = 排在已列图片之后
+    // ─────────────────────────────────────────
+    /*IMG_ORDER_BEGIN*/
+    const IMG_ORDER = {};
+    /*IMG_ORDER_END*/
+
     const productsByCat = { tea: [], clay: [] };  // 各展厅下的产品数据
     let currentCat = null;                         // 当前所在展厅
     let currentModalFolder = null;                 // 当前展开的产品
@@ -844,16 +854,28 @@
               }
             });
             
-            // 图片排序规则（老站规则，按文件名中的数字大小排）：
+            // 图片排序两步走：
+            // ① 若「图片排序台」为这件产品存过顺序表 → 严格按表里的先后；
+            // ② 表里没列到的（比如刚加的新图）按文件名规则排在后面。
+            // 默认规则（老站规则，按文件名中的数字大小排）：
             // 末尾带 "-序号" 的（-0/-1/-2…-10）按序号数字升序；无序号排其后按文件名；
             // 序号相同按文件名。例：国际盆 6 张 → -0,-1,-2,-3,-4,-5
-            images.sort(function (a, b) {
+            function defaultImgCmp(a, b) {
               function tailNo(n) { var m = n.match(/-(\d+)(\.[^.]+)?$/); return m ? parseInt(m[1], 10) : NaN; }
               var na = tailNo(a), nb = tailNo(b);
               var aHas = !isNaN(na), bHas = !isNaN(nb);
               if (aHas !== bHas) return aHas ? -1 : 1;
               if (aHas && bHas && na !== nb) return na - nb;
               return a < b ? -1 : (a > b ? 1 : 0);
+            }
+            images.sort(function (a, b) {
+              var list = IMG_ORDER[rel];
+              var ia = list ? list.indexOf(a) : -1;
+              var ib = list ? list.indexOf(b) : -1;
+              if (ia >= 0 && ib >= 0) return ia - ib;
+              if (ia >= 0) return -1;
+              if (ib >= 0) return 1;
+              return defaultImgCmp(a, b);
             });
             
             // 如果没有专门名为 thumb 的图片，则降级使用第一张图片作为封面保证页面不崩溃
