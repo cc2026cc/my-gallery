@@ -378,7 +378,7 @@
       <a class="door door-tea" id="door-tea" href="#cat-tea">
         <picture>
           <source media="(min-width:900px)" srcset="assets/tea-hero-pc.jpg">
-          <img class="door-img" src="assets/tea-hero.jpg" alt="茶器：茶席上的柴烧壶" fetchpriority="high" decoding="async">
+          <img class="door-img" src="assets/tea-hero.jpg" alt="茶器：柴烧小西施壶出汤" fetchpriority="high" decoding="async">
         </picture>
         <div class="shade"></div>
         <div class="zone-body">
@@ -541,6 +541,31 @@
   "粗陶花盆/07-手工陶盆/DSC08343-1.jpg":[1600,1600],
   "粗陶花盆/07-手工陶盆/DSC08344-1.jpg":[1600,1600],
   "粗陶花盆/07-手工陶盆/DSC08345-1.jpg":[1600,1600],
+  "粗陶花盆/08-金钟盆/1748754814013.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814015.jpg":[1600,1589],
+  "粗陶花盆/08-金钟盆/1748754814169.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814171.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814176.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814180.jpg":[1600,1357],
+  "粗陶花盆/08-金钟盆/1748754814197-2.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814208-2.jpg":[1600,1200],
+  "粗陶花盆/08-金钟盆/1748754814210-2.jpg":[1600,1256],
+  "粗陶花盆/08-金钟盆/1748754814210-3.jpg":[1600,1352],
+  "粗陶花盆/09-兰花盆/DSC06935-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06936-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06937-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06938-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06940-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06941-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/DSC06942-1.jpg":[1600,1600],
+  "粗陶花盆/09-兰花盆/粗陶兰花盆_DSC0487-1.jpg":[1200,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181412.jpg":[1558,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181421.jpg":[1600,1566],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181739.jpg":[1200,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181746.jpg":[1200,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181803.jpg":[1200,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181825.jpg":[1200,1600],
+  "粗陶花盆/10-33口径平口/IMG_20250702_181856.jpg":[1550,1600],
   "细陶茶器/01-粗陶柴烧坛香壶/_DSC4438-1.jpg":[1600,1067],
   "细陶茶器/01-粗陶柴烧坛香壶/_DSC6263-1.jpg":[1600,1067],
   "细陶茶器/01-粗陶柴烧坛香壶/_DSC6267-1.jpg":[1600,900],
@@ -559,6 +584,9 @@
   "细陶茶器/03-柴烧西施/小西施场景模特图1_01.jpg":[1600,715],
   "细陶茶器/03-柴烧西施/小西施场景模特图1_02.jpg":[1600,714],
   "细陶茶器/03-柴烧西施/小西施场景模特图1_03.jpg":[1600,714],
+  "细陶茶器/03-柴烧西施/小西施场景模特图_01.jpg":[1600,1052],
+  "细陶茶器/03-柴烧西施/小西施场景模特图_02.jpg":[1600,1053],
+  "细陶茶器/03-柴烧西施/小西施场景模特图_03.jpg":[1600,1052],
   "细陶茶器/04-柴烧仿古壶/_DSC8924.JPG":[1620,1080],
   "细陶茶器/04-柴烧仿古壶/_DSC8927.JPG":[1620,1080],
   "细陶茶器/04-柴烧仿古壶/_DSC8928.JPG":[1620,1080],
@@ -918,6 +946,19 @@
       }
     }
     
+    // 价格吊牌压缩成一眼可读：多规格取最低价加「起」，并去掉「元/个」这类尾缀。
+    // 例："14.9元/个" -> "14.9"；"小号10.9元、中号15.9元、大号21.9元" -> "10.9起"
+    function tidyPrice(raw) {
+      const s = String(raw == null ? '' : raw).trim().replace(/^¥\s*/, '');
+      const nums = s.match(/\d+(?:\.\d+)?/g);
+      if (!nums) return s;
+      const uniq = nums.map(Number)
+        .filter(function (n, i, a) { return a.indexOf(n) === i; })
+        .sort(function (a, b) { return a - b; });
+      const tiered = uniq.length > 1 || /、|起/.test(s);
+      return uniq[0] + (tiered ? '起' : '');
+    }
+
     // 粗陶花盆：后台并行读取各产品 info.txt 的「价格」与规格行，补齐卡片吊牌。
     // 故意不放进初始化主流程——raw 图片源偶发挂起，串行 await 会把整个展厅拖死。
     function loadClayMeta() {
@@ -928,7 +969,7 @@
           .then(function (buf) {
             const itext = new TextDecoder('utf-8').decode(buf);
             const pm = itext.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
-            if (pm) p.price = pm[1].trim().replace(/^¥\s*/, '');
+            if (pm) p.price = tidyPrice(pm[1]);
             const sm = itext.match(/^[ \t]*(口径[^\n]*)$/m);
             if (sm) p.spec = sm[1].trim().replace(/，/g, ' · ');
             if (currentCat === 'clay') patchClayCard(idx, p);
@@ -965,7 +1006,7 @@
       if (isClay) {
         card.innerHTML = `
         <div class="clay-pic"><img src="${coverUrl}" alt="${cardName}" loading="lazy" decoding="async"></div>
-        <div class="product-info"><h3 class="serif">${cardName}${price ? `<span class="clay-price-inline">¥${escapeHtml(price)}</span>` : ''}</h3>${spec ? `<div class="clay-spec">${escapeHtml(spec)}</div>` : ''}</div>
+        <div class="product-info"><h3 class="serif">${cardName}${price ? `<span class="clay-price-inline">¥${escapeHtml(tidyPrice(price))}</span>` : ''}</h3>${spec ? `<div class="clay-spec">${escapeHtml(spec)}</div>` : ''}</div>
       `;
       } else {
         card.innerHTML = `
