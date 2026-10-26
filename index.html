@@ -50,9 +50,7 @@
     .door { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; cursor: pointer; transition: flex-grow .9s cubic-bezier(.42,0,.58,1) .08s; text-decoration: none; color: inherit; }
     .door-tea { flex: 1.35; }
     .door-clay { flex: 1; background: #1a0f08; align-items: flex-end; }
-    .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: scale(1.012); transition: transform .9s cubic-bezier(.22,.8,.24,1); will-change: transform; }
-    /* 悬停只做缓慢放大（约 +5%），不跟随鼠标位移 */
-    .door:hover .door-img { transform: scale(1.06); }
+    .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: scale(1); transition: transform .6s cubic-bezier(.22,.8,.24,1); will-change: transform; }
     .shade { position: absolute; inset: 0; }
     .door-tea .shade { background: linear-gradient(180deg, rgba(14,10,6,.58), rgba(14,10,6,.06) 42%, rgba(14,10,6,.9)); }
     .door-clay .shade { background: linear-gradient(180deg, rgba(30,14,5,.82), rgba(30,14,5,.28) 42%, rgba(20,9,3,.92)); }
@@ -64,7 +62,6 @@
     .meta { margin-top: 12px; font-size: clamp(12px, 1.05vw, 14px); letter-spacing: .08em; color: rgba(242,232,213,.72); min-height: 1.4em; }
     .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 11px 24px; border: 1px solid rgba(216,168,94,.5); border-radius: 999px; font-size: 13px; letter-spacing: .24em; color: var(--gold-l); transition: background .3s, color .3s, border-color .3s; }
     .go svg { width: 12px; height: 12px; }
-    .door:hover .go { background: var(--gold); border-color: var(--gold); color: #1a1409; }
     .seam { position: relative; flex: 0 0 1px; align-self: stretch; background: linear-gradient(90deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); z-index: 5; }
     .top { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(20px + env(safe-area-inset-top)) 32px 8px; z-index: 8; pointer-events: none; }
     .top b { font-size: 19px; font-weight: 600; letter-spacing: .5em; font-family: var(--serif); }
@@ -90,6 +87,9 @@
       .door-clay h1 { font-size: clamp(30px, 8vw, 40px); }
     }
     @media (hover: hover) {
+      /* 悬停只做两件事：门幅微扩 + 门图缓慢放大。鼠标移动不再驱动任何动画 */
+      .door:hover .door-img { transform: scale(1.05); }
+      .door:hover .go { background: var(--gold); border-color: var(--gold); color: #1a1409; }
       /* 互斥 + 80ms 过渡死区：鼠标压在 1px 窑缝上时两扇门可能同时 :hover，
          flex 值反复横跳就是"中线抽搐"的根因；:not(:has()) 保证只有一个门响应 */
       .stage:has(.door-tea:hover):not(:has(.door-clay:hover)) .door-tea { flex: 1.4; }
@@ -878,7 +878,7 @@
                   images.push(file.name); // 其他图片推入详情页数组（剥离缩略图）
                 }
               } else if (ext === 'md' || ext === 'txt') {
-                // 产品介绍统一只用 info.txt；万一以后再冒出 info.md，也不让它抢走优先级
+                // 产品文件夹只该有 info.txt；md 仅在没有 txt 时兜底
                 if (ext === 'txt' || infoType === '') {
                   infoUrl = `${rawBase}/${encRel(rel)}/${encodeURIComponent(file.name)}`;
                   infoType = ext;
@@ -1102,7 +1102,7 @@
 
           let bodyText = lines.slice(1).join('\n').trim();
           const pm = text.match(/^[ \t]*价格[:：]?\s*(.+)$/m);
-          if (pm) price = pm[1].trim().replace(/^¥\s*/, '');
+          if (pm) price = tidyPrice(pm[1]);   // 多规格价取最低价 + 「起」，与列表吊牌一致
           bodyText = bodyText.replace(/^[ \t]*价格[:：]?.*$/m, '');
           // 剔除【交易必读】段（粗陶告示牌已在展厅顶部展示）与【已结缘】标记（印章+已售按钮已表达）
           const tIdx = bodyText.indexOf('【交易必读】');
@@ -1111,9 +1111,7 @@
 
           if (!bodyText) {
             bodyHTML = '';
-          } else if (infoType === 'md' || /(^|\n)\s*#{2,6}\s|\*\*/.test(bodyText)) {
-            // 只发 .txt 之后：txt 里若仍带 markdown 标记（## 小标题 / **加粗**）照样按富文本排，
-            // 否则会把「###### 」和星号原样显示出来
+          } else if (infoType === 'md') {
             bodyHTML = `<div class="md-body">${renderMarkdown(bodyText)}</div>`;
           } else {
             bodyHTML = `<div class="txt-body">${escapeHtml(bodyText)}</div>`;
@@ -1394,7 +1392,6 @@
 
     // 开窑仪式：帘幕向两侧拉开，火光与火星随之淡入
     document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('ready'); });
-
 
   </script>
 </body>
