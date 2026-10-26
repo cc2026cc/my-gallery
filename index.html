@@ -46,12 +46,13 @@
     
     /* ===== 窑门双开 · 首页 ===== */
     #home { position: relative; }
-    .stage { position: fixed; inset: 0; display: flex; flex-direction: column; --px: 0; --py: 0; }
+    .stage { position: fixed; inset: 0; display: flex; flex-direction: column; }
     .door { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; cursor: pointer; transition: flex-grow .9s cubic-bezier(.42,0,.58,1) .08s; text-decoration: none; color: inherit; }
     .door-tea { flex: 1.35; }
     .door-clay { flex: 1; background: #1a0f08; align-items: flex-end; }
-    .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: translate3d(calc(var(--px) * -12px), calc(var(--py) * -12px), 0) scale(1.012); transition: transform .35s ease-out; will-change: transform; }
-    .door:hover .door-img { transform: translate3d(calc(var(--px) * -12px), calc(var(--py) * -12px), 0) scale(1.012); }
+    .door-img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; transform: scale(1.012); transition: transform .9s cubic-bezier(.22,.8,.24,1); will-change: transform; }
+    /* 悬停只做缓慢放大（约 +5%），不跟随鼠标位移 */
+    .door:hover .door-img { transform: scale(1.06); }
     .shade { position: absolute; inset: 0; }
     .door-tea .shade { background: linear-gradient(180deg, rgba(14,10,6,.58), rgba(14,10,6,.06) 42%, rgba(14,10,6,.9)); }
     .door-clay .shade { background: linear-gradient(180deg, rgba(30,14,5,.82), rgba(30,14,5,.28) 42%, rgba(20,9,3,.92)); }
@@ -581,9 +582,6 @@
   "细陶茶器/03-柴烧西施/04.jpg":[2134,1200],
   "细陶茶器/03-柴烧西施/05.jpg":[2133,1200],
   "细陶茶器/03-柴烧西施/06.jpg":[1600,1200],
-  "细陶茶器/03-柴烧西施/小西施场景模特图1_01.jpg":[1600,715],
-  "细陶茶器/03-柴烧西施/小西施场景模特图1_02.jpg":[1600,714],
-  "细陶茶器/03-柴烧西施/小西施场景模特图1_03.jpg":[1600,714],
   "细陶茶器/03-柴烧西施/小西施场景模特图_01.jpg":[1600,1052],
   "细陶茶器/03-柴烧西施/小西施场景模特图_02.jpg":[1600,1053],
   "细陶茶器/03-柴烧西施/小西施场景模特图_03.jpg":[1600,1052],
@@ -880,7 +878,8 @@
                   images.push(file.name); // 其他图片推入详情页数组（剥离缩略图）
                 }
               } else if (ext === 'md' || ext === 'txt') {
-                if (ext === 'md' || infoType === '') {
+                // 产品介绍统一只用 info.txt；万一以后再冒出 info.md，也不让它抢走优先级
+                if (ext === 'txt' || infoType === '') {
                   infoUrl = `${rawBase}/${encRel(rel)}/${encodeURIComponent(file.name)}`;
                   infoType = ext;
                 }
@@ -1112,7 +1111,9 @@
 
           if (!bodyText) {
             bodyHTML = '';
-          } else if (infoType === 'md') {
+          } else if (infoType === 'md' || /(^|\n)\s*#{2,6}\s|\*\*/.test(bodyText)) {
+            // 只发 .txt 之后：txt 里若仍带 markdown 标记（## 小标题 / **加粗**）照样按富文本排，
+            // 否则会把「###### 」和星号原样显示出来
             bodyHTML = `<div class="md-body">${renderMarkdown(bodyText)}</div>`;
           } else {
             bodyHTML = `<div class="txt-body">${escapeHtml(bodyText)}</div>`;
@@ -1394,18 +1395,7 @@
     // 开窑仪式：帘幕向两侧拉开，火光与火星随之淡入
     document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('ready'); });
 
-    // 鼠标视差：探头看窑的纵深感
-    (function () {
-      var st = document.querySelector('.stage'), raf = null;
-      window.addEventListener('mousemove', function (e) {
-        if (raf) return;
-        raf = requestAnimationFrame(function () {
-          st.style.setProperty('--px', ((e.clientX / window.innerWidth - .5) * 2).toFixed(3));
-          st.style.setProperty('--py', ((e.clientY / window.innerHeight - .5) * 2).toFixed(3));
-          raf = null;
-        });
-      }, { passive: true });
-    })();
+
   </script>
 </body>
 </html>
