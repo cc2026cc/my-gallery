@@ -256,16 +256,19 @@
        .glass 卡片：绝对定位于槽内；初始满宽、骑首图内下缘；吸顶后收缩为右上角细长条 */
     .gslot { position: sticky; top: var(--g-top); z-index: 5; margin: var(--g-mt) var(--g-mx) 0; height: var(--g-h); pointer-events: none; }
     /* 磨砂玻璃的四条硬规矩（改样式时别破）：
-       ① backdrop-filter（背景模糊）必须交给 ::before 那一层，并让它往外扩 3px。
+       ① backdrop-filter（背景模糊）交给 ::before 那一层，并让它往外扩 3px。
           原因：模糊区的边缘天生和"没模糊的真实背景"对不齐，会在卡片最外圈留出
-          1px 的暗环——就是之前那条"极细黑边"。外扩之后接缝落在卡片外，
-          被父层的 overflow:hidden 裁掉，边缘就干净了（已用像素扫描验证）。
-       ② 不要写 border。有边框时模糊只铺到内边距盒，边框那一圈同样会成暗线。
-          描边改用 ::after 的 inset 光环（画在同一层上，没有缝）。
-       ③ 不要写 inset 0 -1px 0 rgba(0,0,0,…)。那是压在卡片内下缘的深色线，
-          在吸顶的小胶囊（圆角 999px）上会贴着下弧跑，也像"黑边"。
+          1px 的接缝。外扩之后接缝落在卡片外，被父层的 overflow:hidden 裁掉。
+       ② 【最容易踩的坑】不要用「整圈 1px 浅色描边」当边框（inset 0 0 0 1px 浅色）。
+          它正好压在最外那 1px 上，和背景色一混就发灰——在有饱和度的背景（比如
+          橙色陶土）上会被看成"一圈极细的暗色环"。像素实测：描边 16% 透明度时，
+          边缘 RGB 从 144,57,4 变成 162,88,38（蓝通道翻十倍＝发灰）。
+          结论：只留顶部 1px 高光（inset 0 1px 0），四周一律不画描边，靠底色与投影分界。
+       ③ 不要写 border。有边框时模糊只铺到内边距盒，边框那一圈同样会成暗线；
+          也不要写 inset 0 -1px 0 深色线（吸顶胶囊上会贴着下弧跑）。
        ④ 底色只用 40%~55% 的透明度：再高就成了实心黑卡（看不见后面的器物），
-          再低文字会糊在亮图上。 */
+          再低文字会糊在亮图上。模糊度别超过 12px——太糊就只剩一片色块，
+          看不出后面器物的轮廓（用户要求"透过玻璃条能看到背景色大致分界"）。 */
     .glass { position: absolute; top: 0; right: 0; width: 100%; height: var(--g-h); pointer-events: auto;
       display: flex; align-items: center; gap: var(--g-gap); padding: var(--g-pad);
       border-radius: 16px; white-space: nowrap; overflow: hidden;
@@ -274,13 +277,15 @@
       transition: width .5s cubic-bezier(.22,1,.36,1), height .4s cubic-bezier(.22,1,.36,1),
         padding .4s cubic-bezier(.22,1,.36,1), border-radius .4s cubic-bezier(.22,1,.36,1),
         gap .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease; }
-    /* 磨砂层（见注释①）：外扩 3px，border-radius 跟随父层 */
+    /* 磨砂层（见注释①④）：外扩 3px，border-radius 跟随父层。
+       模糊降到 9px、饱和度 1.25：能看清后面器物的大致轮廓与背景色分界，
+       又不会糊成一片色块（26px 时背景完全看不出形状）。 */
     .glass::before { content: ''; position: absolute; inset: -3px; border-radius: inherit;
       background: linear-gradient(180deg, rgba(24,19,13,.40), rgba(10,8,5,.52));
-      backdrop-filter: blur(26px) saturate(1.55); -webkit-backdrop-filter: blur(26px) saturate(1.55); }
-    /* 描边光环（见注释②） */
+      backdrop-filter: blur(9px) saturate(1.25); -webkit-backdrop-filter: blur(9px) saturate(1.25); }
+    /* 只留顶部 1px 高光（见注释②：整圈浅色描边会在边缘混出一条发灰的暗环） */
     .glass::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-      box-shadow: inset 0 0 0 1px rgba(255,240,220,.16), inset 0 1px 0 rgba(255,244,226,.14);
+      box-shadow: inset 0 1px 0 rgba(255,244,226,.10);
       transition: box-shadow .4s ease; }
     /* 文字/按钮必须压在磨砂层之上（::before 是定位元素，默认会盖住普通文字） */
     .glass > * { position: relative; z-index: 1; }
@@ -289,7 +294,7 @@
       /* 小胶囊面积小、又压在图片上，透明度略收一点保可读 */
       box-shadow: 0 10px 26px rgba(0,0,0,.40); }
     .glass.pinned::before { background: linear-gradient(180deg, rgba(22,17,12,.50), rgba(10,8,5,.62)); }
-    .glass.pinned::after { box-shadow: inset 0 0 0 1px rgba(255,240,220,.15), inset 0 1px 0 rgba(255,244,226,.13); }
+    .glass.pinned::after { box-shadow: inset 0 1px 0 rgba(255,244,226,.09); }
     /* 品名一行、不换行；太长就省略号收尾（以前会溢出到微信按钮下面，字压字） */
     .glass h1 { font-family: var(--serif); font-size: var(--g-name); font-weight: 600; letter-spacing: .04em; color: var(--text-main); flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     /* 收缩态隐去品名：常驻条只留价格 + 微信（身份由页面本身承载） */
@@ -374,19 +379,31 @@
     .rv { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s cubic-bezier(.22,.8,.3,1); }
     .rv.in { opacity: 1; transform: none; }
 
-    /* ── 粗陶花盆独立展厅：交易必读告示牌（方案一） ── */
-    .clay-notice { background: #3a2c18; border: 1px solid #6b4f24; border-left: 6px solid var(--gold); border-radius: 4px; padding: 26px 26px 22px; margin: 10px 0 46px; }
-    .clay-notice .notice-tag { display: inline-block; background: var(--gold); color: #241a0c; font-size: 12px; letter-spacing: .3em; padding: 4px 12px; border-radius: 2px; margin-bottom: 14px; }
-    .clay-notice h3 { font-family: var(--serif); font-size: 23px; font-weight: 600; color: var(--gold-l); margin: 0 0 18px; letter-spacing: .05em; }
-    .clay-notice ol { list-style: none; counter-reset: cn; margin: 0; padding: 0; }
-    .clay-notice li { counter-increment: cn; position: relative; padding: 8px 0 8px 40px; font-size: 14.5px; color: #e8dcc4; border-bottom: 1px dashed rgba(216,168,94,.18); line-height: 1.75; }
-    .clay-notice li:last-child { border-bottom: none; }
-    .clay-notice li::before { content: counter(cn); position: absolute; left: 0; top: 9px; width: 26px; height: 26px; background: #241a0c; border: 1px solid var(--gold); border-radius: 3px; color: var(--gold-l); font-size: 13px; display: flex; align-items: center; justify-content: center; font-family: var(--serif); }
-    .clay-notice .notice-foot { margin-top: 16px; font-size: 13px; color: var(--accent-color); }
+    /* ── 粗陶花盆独立展厅：交易必读告示牌（紧凑版） ──
+       文案来自 products/粗陶花盆/【交易必读】.txt（运行时读取，逐字不改）；
+       版式只做"压缩"：标题与复制按钮同一行，条目小字号紧行距，整块控制在首屏 1/4 以内 */
+    .clay-notice { background: #3a2c18; border-left: 3px solid var(--gold); border-radius: 4px;
+      padding: 11px 13px 12px; margin: 6px 0 22px; }
+    .notice-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .notice-tag { flex: 0 0 auto; background: var(--gold); color: #241a0c; font-size: 11px; letter-spacing: .22em; padding: 3px 8px 3px 10px; border-radius: 2px; }
+    /* 复制按钮：在「交易必读」同一行的最右端 */
+    .notice-wx { flex: 0 0 auto; margin-left: auto; border: 1px solid rgba(201,160,106,.55); background: rgba(201,160,106,.10);
+      color: var(--gold-l); font-size: 11.5px; letter-spacing: .02em; padding: 3px 10px; border-radius: 999px;
+      cursor: pointer; white-space: nowrap; line-height: 1.5; transition: background .25s, color .25s; }
+    .notice-wx:hover { background: var(--gold); color: #241a0c; }
+    .notice-wx:active { background: var(--gold); color: #241a0c; }
+    .notice-list { list-style: none; counter-reset: cn; margin: 0; padding: 0; }
+    .notice-list li { counter-increment: cn; position: relative; padding-left: 19px; font-size: 13px; line-height: 1.55; color: #e4d8c1; text-align: justify; }
+    .notice-list li + li { margin-top: 4px; }
+    .notice-list li::before { content: counter(cn); position: absolute; left: 0; top: 0; width: 14px; color: var(--gold); font-size: 11px; line-height: 1.85; font-family: var(--serif); }
     @media (max-width: 768px) {
-      .clay-notice { padding: 20px 18px 18px; }
-      .clay-notice h3 { font-size: 19px; }
-      .clay-notice li { font-size: 13.5px; }
+      .clay-notice { padding: 9px 11px 10px; margin-bottom: 16px; }
+      .notice-head { margin-bottom: 5px; gap: 6px; }
+      .notice-tag { font-size: 10px; padding: 2px 7px 2px 8px; letter-spacing: .18em; }
+      .notice-wx { font-size: 10.5px; padding: 2px 8px; }
+      .notice-list li { font-size: 12px; line-height: 1.5; padding-left: 16px; }
+      .notice-list li + li { margin-top: 3px; }
+      .notice-list li::before { font-size: 10px; line-height: 1.8; }
     }
 
     /* ── 粗陶卡片：吊牌价格 + 方案三悬停（上浮 4px + 图缓放 4%） ── */
@@ -410,6 +427,14 @@
       margin: 0 15px; opacity: 0.2;
     }
     
+    /* ===== 轻提示（替代 alert：不打断、不抢焦点，手机上不会抖出键盘） ===== */
+    .toast { position: fixed; left: 50%; bottom: 42px; transform: translate(-50%, 14px); z-index: 3000;
+      max-width: 78vw; text-align: center; background: rgba(26,20,14,.94); color: var(--gold-l);
+      border: 1px solid rgba(201,160,106,.45); border-radius: 999px; padding: 10px 20px;
+      font-size: 13px; letter-spacing: .02em; opacity: 0; pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease; }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
     /* ===== Lightbox ===== */
     .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,1); z-index: 2000; justify-content: center; align-items: center; overflow: hidden; }
     .lightbox img { width: auto; height: auto; max-width: 100%; max-height: 100vh; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; transform-origin: center center; will-change: transform; }
@@ -813,14 +838,46 @@
       });
     }
 
-    // 粗陶花盆展厅顶部的交易必读告示牌（文案与 info.txt 中【交易必读】保持一致）
-    const CLAY_NOTICE = [
-      '盆重压秤，单发运费肉疼，3 个起发（本店任意陶盆），可混搭，让你运费花得值。',
-      '运费实收，不搞假包邮，物流报多少收多少，习惯 9.9 包邮的请绕道。',
-      '拒绝面交，精力有限，谢绝同城自提与线下探店，问地址不回（单笔 2 万以上工程大单除外）。',
+    // 粗陶花盆展厅顶部的交易必读告示牌
+    // 文案唯一来源：products/粗陶花盆/【交易必读】.txt —— 运行时整份读进来，逐字照搬，不增不删。
+    // NOTICE_FALLBACK 只在网络取不到文件时兜底，内容与那份 txt 完全一致。
+    const NOTICE_URL = rawBase + '/' + encodeURIComponent('粗陶花盆') + '/' + encodeURIComponent('【交易必读】.txt') + '?t=' + CACHE_STAMP;
+    const NOTICE_FALLBACK = [
+      '盆重压秤，单发运费肉疼，3个起发（本店任意陶盆），可混搭，让你运费花得值。',
+      '运费实收，不搞假包邮，物流报多少收多少。',
+      '拒绝面交，精力有限，谢绝同城自提与线下探店，问地址不回，（单笔2万以上工程大单除外）。',
       '同城送货，近距离可安排送货，需收取合理运费。',
-      '佛系不议价，全店实价不抹零，若聊得投机，包裹里可能会随机赠送花盆，全看心情。'
+      '不议价，不抹零，包裹里可能会随机赠送花盆，全看心情。'
     ];
+    let clayNoticeItems = NOTICE_FALLBACK;
+    let clayNoticeFetched = false;
+
+    function renderClayNotice() {
+      const box = document.getElementById('clay-notice');
+      if (currentCat !== 'clay') { box.innerHTML = ''; return; }
+      box.innerHTML = '<div class="clay-notice">'
+        + '<div class="notice-head">'
+        + '<span class="notice-tag">交易必读</span>'
+        + '<button class="notice-wx" type="button" onclick="copyWechat()">微信 CJQ678 · 复制</button>'
+        + '</div>'
+        + '<ol class="notice-list">'
+        + clayNoticeItems.map(function (t) { return '<li>' + escapeHtml(t) + '</li>'; }).join('')
+        + '</ol></div>';
+    }
+
+    function loadClayNotice() {
+      if (clayNoticeFetched) return;
+      clayNoticeFetched = true;
+      fetch(NOTICE_URL, { cache: 'no-cache' })
+        .then(function (r) { if (!r.ok) throw new Error('notice ' + r.status); return r.text(); })
+        .then(function (txt) {
+          const items = txt.replace(/^\uFEFF/, '').split(/\r?\n/)
+            .map(function (s) { return s.trim(); })
+            .filter(function (s) { return s && !/^【.*】$/.test(s); });  // 去掉【交易必读】这行标题
+          if (items.length) { clayNoticeItems = items; renderClayNotice(); }
+        })
+        .catch(function () { /* 拉不到就用兜底文案，告示牌不能空着 */ });
+    }
 
     function openCategory(catKey, push) {
       const cat = CATS[catKey];
@@ -830,18 +887,9 @@
       document.getElementById('cat-view').classList.add('on');
       document.getElementById('cat-title').textContent = cat.title;
       document.getElementById('cat-count').textContent = productsByCat[catKey].length ? productsByCat[catKey].length + ' 款' : '';
-      // 粗陶展厅：顶部挂交易必读告示牌；细陶展厅：清空
-      const noticeBox = document.getElementById('clay-notice');
-      if (catKey === 'clay') {
-        noticeBox.innerHTML = `<div class="clay-notice">
-          <div class="notice-tag">交易必读</div>
-          <h3>下单前请看完这 5 条</h3>
-          <ol>${CLAY_NOTICE.map(function (t) { return '<li>' + t + '</li>'; }).join('')}</ol>
-          <div class="notice-foot">看完还有疑问 → 微信：CJQ678（点击右上角或详情页按钮复制）</div>
-        </div>`;
-      } else {
-        noticeBox.innerHTML = '';
-      }
+      // 粗陶展厅：顶部挂交易必读告示牌（先渲染兜底文案，再异步换成 txt 原文）；细陶展厅：清空
+      if (catKey === 'clay') { renderClayNotice(); loadClayNotice(); }
+      else { document.getElementById('clay-notice').innerHTML = ''; }
       const gallery = document.getElementById('gallery');
       gallery.innerHTML = '';
       gallery.style.opacity = '1';
@@ -1461,25 +1509,54 @@
     
     // ─────────────────────────────────────────
     // 复制微信号 (统一字母大写)
+    // 说明：以前用 alert() 弹"已复制"，点确定后焦点会回到临时文本框，
+    //      手机上键盘会闪一下再收起。现在改成本站的轻提示，且兜底复制
+    //      用 readonly + inputmode=none 的文本框，只 select 不聚焦，不弹键盘。
     // ─────────────────────────────────────────
+    let toastTimer = null;
+    function toast(msg) {
+      let el = document.getElementById('toast');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'toast'; el.className = 'toast';
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      void el.offsetWidth;               // 强制回流，连点两次也能重新触发过渡
+      el.classList.add('on');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { el.classList.remove('on'); }, 1800);
+    }
+
     function copyWechat() {
       const wechatId = "CJQ678";
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(wechatId)
-          .then(() => { alert("微信号 CJQ678 已复制！"); })
-          .catch(() => { fallbackCopyTextToClipboard(wechatId); });
+          .then(function () { toast('微信号 CJQ678 已复制'); })
+          .catch(function () { fallbackCopyTextToClipboard(wechatId); });
       } else {
         fallbackCopyTextToClipboard(wechatId);
       }
     }
-    
+
     function fallbackCopyTextToClipboard(text) {
       const textArea = document.createElement("textarea");
-      textArea.value = text; textArea.style.position = "fixed";
-      document.body.appendChild(textArea); textArea.focus(); textArea.select();
-      try { document.execCommand('copy'); alert("微信号 CJQ678 已复制！"); } 
-      catch (err) { alert("请手动输入：CJQ678"); }
+      textArea.value = text;
+      textArea.setAttribute("readonly", "");      // 只读 → 手机不呼出键盘
+      textArea.setAttribute("inputmode", "none"); // 双保险
+      textArea.setAttribute("tabindex", "-1");
+      textArea.setAttribute("aria-hidden", "true");
+      textArea.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;opacity:0;pointer-events:none";
+      document.body.appendChild(textArea);
+      let ok = false;
+      try {
+        textArea.select();
+        textArea.setSelectionRange(0, text.length);
+        ok = document.execCommand('copy');
+      } catch (err) { ok = false; }
+      textArea.blur();
       document.body.removeChild(textArea);
+      toast(ok ? '微信号 CJQ678 已复制' : '请手动输入：CJQ678');
     }
     
     initGallery();
