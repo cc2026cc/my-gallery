@@ -69,12 +69,35 @@
     /* 两门标题都是 4 个字、对称同档；粗陶门仅 42.6% 宽，封顶 58px 防右缘被裁 */
     .door-clay h1 { font-size: clamp(34px, 4vw, 58px); }
     .meta { margin-top: 12px; font-size: clamp(12px, 1.05vw, 14px); letter-spacing: .08em; color: rgba(242,232,213,.72); min-height: 1.4em; }
+    /* 门下方这句话分成两段：名字段 + 款数段。
+       桌面连成一行（用 — 接）；窄屏让款数单独占一行、两行都靠右。
+       原因：交给浏览器自动折行时，末行经常只剩一个「售」字（360px 屏 304px 宽差几像素就折），
+       右对齐下孤字特别扎眼；拆段后断点完全可控，两行字数也均衡。
+       \00a0 = 不换行空格，防止「等」和破折号被拆到两行。 */
+    .meta-names::after { content: '\00a0\2014\00a0'; }
+    @media (max-width: 899px) {
+      .meta-names { display: block; }
+      .meta-names::after { content: ''; }
+      .meta-count { display: block; }
+    }
     .go { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; padding: 11px 24px; border: 1px solid rgba(216,168,94,.5); border-radius: 999px; font-size: 13px; letter-spacing: .24em; color: var(--gold-l); transition: background .3s, color .3s, border-color .3s; }
     .go svg { width: 12px; height: 12px; }
     .seam { position: relative; flex: 0 0 1px; align-self: stretch; background: linear-gradient(90deg, transparent, rgba(216,168,94,.5) 12%, rgba(216,168,94,.5) 88%, transparent); z-index: 5; }
     .top { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(20px + env(safe-area-inset-top)) 32px 8px; z-index: 8; pointer-events: none; }
     .top b { font-size: 19px; font-weight: 600; letter-spacing: .5em; font-family: var(--serif); }
     .top .slogan { display: none; font-size: 11px; letter-spacing: .28em; color: rgba(242,232,213,.55); font-family: var(--serif); }
+    /* 顶栏微信号=按钮（点击复制）。注意 .top 是 pointer-events:none（不挡门的点击），
+       所以按钮必须自己把指针事件接回来，否则看着能点、实际点不动 */
+    .top-wx { pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+      background: rgba(22,16,10,.44); border: 1px solid rgba(216,168,94,.45); color: var(--gold);
+      font-family: var(--sans); font-size: 12px; letter-spacing: .16em; padding: 7px 14px;
+      border-radius: 999px; cursor: pointer; white-space: nowrap;
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      transition: background .25s, color .25s, border-color .25s; }
+    .top-wx:hover { background: var(--gold); border-color: var(--gold); color: #241a0c; }
+    .top-wx:active { transform: scale(.97); }
+    .top-wx svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    @media (max-width: 899px) { .top-wx { font-size: 11px; letter-spacing: .1em; padding: 6px 12px; gap: 5px; } }
     .top span { font-size: 12px; letter-spacing: .16em; color: var(--gold); }
     .curtain { position: fixed; left: 0; right: 0; height: 50.8%; background: #100d0a; z-index: 20; transition: transform 1.15s cubic-bezier(.7,0,.2,1); pointer-events: auto; }
     .curtain-l { top: 0; border-bottom: 1px solid rgba(216,168,94,.25); }
@@ -211,7 +234,9 @@
     #product-modal {
       --g-pad:13px 24px; --g-gap:14px; --g-name:19px; --g-price:20px; --g-price-s:12px;
       --g-btn:12.5px; --g-btn-pad:9px 17px; --g-hint:11.5px; --g-sold:10.5px; --g-bh:36px;
-      --g-mt:-64px; --g-mx:12px; --g-top:12px;
+      /* --g-top = 吸顶位置。取值让吸顶后的小胶囊与左上角返回按钮（fixed top:20px 高36px → 中心 38px）
+         严格同轴：38 - --g-hm/2。桌面 38-21=17，手机 38-19=19 */
+      --g-mt:-64px; --g-mx:12px; --g-top:17px;
       --g-h:60px;
       /* 吸顶细长条：品名在收缩态隐去，只留价格+微信；
          弧心重合公式：「上下/右内边距 + 按钮半径 = 玻璃半径(=高/2)」桌面 7+14=21 ✓（玻璃无边框，见 .glass 注释） */
@@ -274,15 +299,18 @@
       border-radius: 16px; white-space: nowrap; overflow: hidden;
       /* 外投影必须留在这一层：写进 ::after 会被 overflow:hidden 一起裁掉 */
       box-shadow: 0 14px 34px rgba(0,0,0,.34);
-      transition: width .5s cubic-bezier(.22,1,.36,1), height .4s cubic-bezier(.22,1,.36,1),
-        padding .4s cubic-bezier(.22,1,.36,1), border-radius .4s cubic-bezier(.22,1,.36,1),
-        gap .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease; }
+      /* 收缩节奏：整卡宽度收窄 .85s（缩小最慢的主动作），高度/内边距/圆角/间距 .6s 跟随。
+         早先 .5/.4 收得太急，像"啪"一下弹走；放慢后有慢慢沉到右上角的从容感。
+         改这里要同步 .gbtn 的 transition（按钮跟卡片一起收，不能各走各的）。 */
+      transition: width .85s cubic-bezier(.22,1,.36,1), height .6s cubic-bezier(.22,1,.36,1),
+        padding .6s cubic-bezier(.22,1,.36,1), border-radius .6s cubic-bezier(.22,1,.36,1),
+        gap .6s cubic-bezier(.22,1,.36,1), box-shadow .6s ease; }
     /* 磨砂层（见注释①④）：外扩 3px，border-radius 跟随父层。
        模糊降到 9px、饱和度 1.25：能看清后面器物的大致轮廓与背景色分界，
        又不会糊成一片色块（26px 时背景完全看不出形状）。 */
     .glass::before { content: ''; position: absolute; inset: -3px; border-radius: inherit;
       background: linear-gradient(180deg, rgba(24,19,13,.40), rgba(10,8,5,.52));
-      backdrop-filter: blur(9px) saturate(1.25); -webkit-backdrop-filter: blur(9px) saturate(1.25); }
+      backdrop-filter: blur(6.3px) saturate(1.25); -webkit-backdrop-filter: blur(6.3px) saturate(1.25); }
     /* 只留顶部 1px 高光（见注释②：整圈浅色描边会在边缘混出一条发灰的暗环） */
     .glass::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
       box-shadow: inset 0 1px 0 rgba(255,244,226,.10);
@@ -308,9 +336,9 @@
     /* ===== 微信按钮（毛玻璃卡内）===== */
     .gbtn { flex: 0 0 auto; margin-left: auto; height: var(--g-bh); border: 1px solid var(--gold); background: rgba(201,160,106,.12); color: var(--gold-l);
       font-size: var(--g-btn); padding: var(--g-btn-pad); border-radius: 6px; cursor: pointer; letter-spacing: .04em; white-space: nowrap;
-      /* 收缩动画与玻璃卡同步：高/内边距/圆角同曲线同时长，悬停色 .25s */
-      transition: height .4s cubic-bezier(.22,1,.36,1), padding .4s cubic-bezier(.22,1,.36,1),
-        border-radius .4s cubic-bezier(.22,1,.36,1), background .25s, color .25s; }
+      /* 收缩动画与玻璃卡同步：高/内边距/圆角 同为 .6s 同曲线（卡片 .85s 收宽，按钮跟手不失步） */
+      transition: height .6s cubic-bezier(.22,1,.36,1), padding .6s cubic-bezier(.22,1,.36,1),
+        border-radius .6s cubic-bezier(.22,1,.36,1), background .25s, color .25s; }
     .gbtn:hover { background: var(--gold); color: #241a0c; }
     .gbtn .hint { color: rgba(201,160,106,.55); font-size: var(--g-hint); margin-left: 5px; }
     .gbtn:hover .hint { color: rgba(36,26,12,.65); }
@@ -332,7 +360,7 @@
       #product-modal {
         --g-pad:9px 12px; --g-gap:8px; --g-name:14px; --g-price:15px; --g-price-s:10px;
         --g-btn:10.5px; --g-btn-pad:6px 10px; --g-hint:9.5px; --g-sold:9px; --g-bh:28px;
-        --g-mt:-52px; --g-mx:10px; --g-top:10px;
+        --g-mt:-52px; --g-mx:10px; --g-top:19px;
         --g-h:50px;
         --g-hm:38px; --g-mini-w:180px;
         --g-mpv:6px; --g-mpl:13px; --g-mgap:7px;
@@ -479,7 +507,7 @@
     <header class="top">
       <b>荣昌陶</b>
       <span class="slogan">泥火交融，凝结匠心 · 每一件作品，都是与时间的对话</span>
-      <span>微信：CJQ678</span>
+      <button class="top-wx" type="button" onclick="copyWechat()" aria-label="复制微信号 CJQ678"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L4 21l1.7-4.2A8.5 8.5 0 1 1 21 11.5z"/></svg>微信 CJQ678</button>
     </header>
     <div class="glow"></div>
     <div class="embers">
@@ -834,7 +862,17 @@
         if (!el) return;
         if (!list.length) { el.textContent = '暂虚位以待'; return; }
         const names = list.slice(0, 3).map(function (p) { return p.cardName; }).join(' · ');
-        el.textContent = names + (list.length > 3 ? ' 等' : '') + ' — ' + list.length + ' 款在售';
+        // 拆成两个节点（不用 innerHTML，产品名走 textContent 防注入）：
+        // 名字段 / 款数段，窄屏靠 CSS 让款数单独成行，避免末行只剩一个「售」字
+        el.textContent = '';
+        const sName = document.createElement('span');
+        sName.className = 'meta-names';
+        sName.textContent = names + (list.length > 3 ? ' 等' : '');
+        const sCount = document.createElement('span');
+        sCount.className = 'meta-count';
+        sCount.textContent = list.length + ' 款在售';
+        el.appendChild(sName);
+        el.appendChild(sCount);
       });
     }
 
@@ -1305,6 +1343,8 @@
         if (bodyHTML) { textEl.innerHTML = bodyHTML; textEl.style.display = ''; }
         else textEl.remove();
       }
+      // 每次开详情都重算一次阈值：横竖屏切换会换 --g-top（12/17 与 10/19 两档）
+      refreshPinTop();
       syncPin();
     }
 
@@ -1330,6 +1370,16 @@
 
     /* 吸顶收缩：卡槽触顶 → 卡片加 .pinned，CSS 过渡收缩为右上角细长条（模态容器内滚动） */
     let pinRaf = false;
+    // 触顶阈值不能写死：吸顶后 slot.top 恒等于 --g-top（桌面 17 / 手机 19），
+    // 阈值若比它小就永远判不成"触顶"，卡片会一直保持满宽不收缩。
+    // 所以直接读 CSS 变量算，改 --g-top 时不用再动 JS。
+    let pinTop = 0;
+    function refreshPinTop() {
+      const slot = document.querySelector('.gslot');
+      if (!slot) return;
+      const v = parseFloat(getComputedStyle(slot).getPropertyValue('--g-top'));
+      pinTop = (isNaN(v) ? 12 : v) + 1;
+    }
     function syncPin() {
       if (pinRaf) return;
       pinRaf = true;
@@ -1337,7 +1387,8 @@
         pinRaf = false;
         const slot = document.querySelector('.gslot'), g = slot && slot.querySelector('.glass');
         if (!g) return;
-        g.classList.toggle('pinned', slot.getBoundingClientRect().top <= 13);
+        if (!pinTop) refreshPinTop();
+        g.classList.toggle('pinned', slot.getBoundingClientRect().top <= pinTop);
       });
     }
     
