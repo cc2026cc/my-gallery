@@ -1,5 +1,5 @@
 {
- "stamp": "2026-10-27T11:28",
+ "stamp": "2026-10-27T16:41",
  "cats": [
   {
    "key": "tea",
@@ -16,7 +16,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "cc44f31e"
     },
     {
      "folder": "02-主人杯",
@@ -32,7 +33,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "dca97af0"
     },
     {
      "folder": "03-柴烧西施",
@@ -51,7 +53,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "f5fa1012"
     },
     {
      "folder": "04-柴烧仿古壶",
@@ -64,7 +67,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "6ca4bfdf"
     },
     {
      "folder": "05-坛香壶",
@@ -84,7 +88,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "742b0ff2"
     },
     {
      "folder": "06-绞泥酒坛",
@@ -100,7 +105,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "",
-     "spec": ""
+     "spec": "",
+     "v": "9d2bfc09"
     }
    ]
   },
@@ -122,7 +128,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "14.9",
-     "spec": "口径约21.5 · 高约18cm"
+     "spec": "口径约21.5 · 高约18cm",
+     "v": "a7d8f32f"
     },
     {
      "folder": "02-大号国际盆",
@@ -138,7 +145,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "23.9",
-     "spec": "口径约25cm · 高约22cm"
+     "spec": "口径约25cm · 高约22cm",
+     "v": "3b6d51cb"
     },
     {
      "folder": "03-鱼鳞纹国际盆",
@@ -156,7 +164,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "13.9",
-     "spec": ""
+     "spec": "",
+     "v": "0f49fe78"
     },
     {
      "folder": "04-藤纹国际盆",
@@ -172,7 +181,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "14.9",
-     "spec": ""
+     "spec": "",
+     "v": "a878db20"
     },
     {
      "folder": "05-大蛮腰",
@@ -186,7 +196,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "13",
-     "spec": ""
+     "spec": "",
+     "v": "a8cf5094"
     },
     {
      "folder": "06-小蛮腰",
@@ -200,7 +211,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "9.9",
-     "spec": ""
+     "spec": "",
+     "v": "51188336"
     },
     {
      "folder": "07-手工陶盆",
@@ -213,7 +225,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "99",
-     "spec": ""
+     "spec": "",
+     "v": "c4c0cd6a"
     },
     {
      "folder": "08-金钟盆",
@@ -233,7 +246,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "10.9起",
-     "spec": ""
+     "spec": "",
+     "v": "127e0727"
     },
     {
      "folder": "09-兰花盆",
@@ -251,7 +265,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "20起",
-     "spec": ""
+     "spec": "",
+     "v": "7dfca3d4"
     },
     {
      "folder": "10-33口径平口",
@@ -268,7 +283,8 @@
      "thumb": "thumb.webp",
      "info": "info.txt",
      "price": "35",
-     "spec": ""
+     "spec": "",
+     "v": "2639ec06"
     }
    ]
   }

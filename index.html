@@ -96,7 +96,7 @@
       transition: background .25s, color .25s, border-color .25s; }
     .top-wx:hover { background: var(--gold); border-color: var(--gold); color: #241a0c; }
     .top-wx:active { transform: scale(.97); }
-    .top-wx svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .top-wx svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     @media (max-width: 899px) { .top-wx { font-size: 11px; letter-spacing: .1em; padding: 6px 12px; gap: 5px; } }
     .top span { font-size: 12px; letter-spacing: .16em; color: var(--gold); }
     .curtain { position: fixed; left: 0; right: 0; height: 50.8%; background: #100d0a; z-index: 20; transition: transform 1.15s cubic-bezier(.7,0,.2,1); pointer-events: auto; }
@@ -310,7 +310,7 @@
        又不会糊成一片色块（26px 时背景完全看不出形状）。 */
     .glass::before { content: ''; position: absolute; inset: -3px; border-radius: inherit;
       background: linear-gradient(180deg, rgba(24,19,13,.40), rgba(10,8,5,.52));
-      backdrop-filter: blur(6.3px) saturate(1.25); -webkit-backdrop-filter: blur(6.3px) saturate(1.25); }
+      backdrop-filter: blur(4.4px) saturate(1.25); -webkit-backdrop-filter: blur(4.4px) saturate(1.25); }
     /* 只留顶部 1px 高光（见注释②：整圈浅色描边会在边缘混出一条发灰的暗环） */
     .glass::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
       box-shadow: inset 0 1px 0 rgba(255,244,226,.10);
@@ -507,7 +507,7 @@
     <header class="top">
       <b>荣昌陶</b>
       <span class="slogan">泥火交融，凝结匠心 · 每一件作品，都是与时间的对话</span>
-      <button class="top-wx" type="button" onclick="copyWechat()" aria-label="复制微信号 CJQ678"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L4 21l1.7-4.2A8.5 8.5 0 1 1 21 11.5z"/></svg>微信 CJQ678</button>
+      <button class="top-wx" type="button" onclick="copyWechat()" aria-label="复制微信号 CJQ678"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="wxGap"><rect x="0" y="0" width="24" height="24" fill="#fff"/><path d="M17.2 10.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2Z" fill="#000" stroke="#000" stroke-width="2.2"/><path d="M20.2 17.4 22.2 20.6 18.8 19.2Z" fill="#000" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/></mask></defs><g mask="url(#wxGap)"><path d="M9.7 2.5C5.2 2.5 1.6 5.5 1.6 9.2c0 2 1.1 3.8 2.8 5.1l-.9 3.1 3.4-1.7c.9.2 1.8.3 2.8.3 4.5 0 8.1-3 8.1-6.8S14.2 2.5 9.7 2.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></g><path d="M17.2 10.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2Z" style="fill:currentColor;stroke:none"/><path d="M20.2 17.4 22.2 20.6 18.8 19.2Z" style="fill:currentColor;stroke:none"/><circle cx="6.4" cy="7.6" r="1" style="fill:currentColor;stroke:none"/><circle cx="12.6" cy="7.6" r="1" style="fill:currentColor;stroke:none"/></svg>微信 CJQ678</button>
     </header>
     <div class="glow"></div>
     <div class="embers">
@@ -564,7 +564,11 @@
       return MIRROR + 'api/products' + (parts.length ? '/' + parts.join('/') : '') + '.json';
     }
     m = u.match(/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/main\/(.+?)(?:\?.*)?$/);
-    if (m) return MIRROR + decodeURIComponent(m[1]);
+    if (m) {
+      // 保留 ?v=指纹 等查询串：本地预览要和线上完全同一条网址，测试才验得出真实行为
+      var q = u.indexOf('?') >= 0 ? u.slice(u.indexOf('?')) : '';
+      return MIRROR + decodeURIComponent(m[1]) + q;
+    }
     return null;
   }
   window.fetch = function(input, init){
@@ -751,6 +755,22 @@
     // ─────────────────────────────────────────
     // 使用单一会话时间戳，保证页面刷新时获取最新内容，但在同一次访问中各预加载组件能够共享缓存，避免重复请求带宽浪费
     const CACHE_STAMP = new Date().getTime(); 
+
+    // ── 图片版本号（内容指纹）──
+    // 以前所有图片 URL 后面挂 ?t=本次打开的时间戳，等于每次都换新网址，
+    // 浏览器缓存 100% 失效：退回列表再点进同一个产品，整页图要重下一遍。
+    // 现在改用发布时算好的内容指纹（products.json 里每个产品的 v 字段）：
+    //   图没动 → 指纹不变 → 网址不变 → 永久命中浏览器缓存（第二次进 0 字节）
+    //   图换了 → 指纹变 → 只有这个产品的图重下，其余产品继续走缓存
+    // 指纹只随产品图内容变，跟"第几次打开页面"无关，也不需要用户清缓存。
+    var VER_BY_REL = {};
+    function verUrl(rel, name) {
+      var v = VER_BY_REL[rel];
+      if (v) return `${rawBase}/${encRel(rel)}/${encodeURIComponent(name)}?v=${v}`;
+      // 兜底：走 GitHub API 老路（清单读不到）时没有指纹，退回时间戳，保证不读到旧图
+      return `${rawBase}/${encRel(rel)}/${encodeURIComponent(name)}?t=${CACHE_STAMP}`;
+    }
+
     const preloadedImagesCache = new Set();
     
     function preloadImage(url) {
@@ -775,7 +795,7 @@
             const rel = card.dataset.rel;
             const firstImg = card.dataset.firstImage;
             if (rel && firstImg) {
-              const url = `${rawBase}/${encRel(rel)}/${encodeURIComponent(firstImg)}?t=${CACHE_STAMP}`;
+              const url = verUrl(rel, firstImg);
             // 延迟 500ms 执行，确保优先加载当前页面的缩略图，不抢占资源
             setTimeout(() => preloadImage(url), 500);
           }
@@ -1027,12 +1047,13 @@
           var rel = c.folder + '/' + p.folder;
           var images = sortImages(rel, p.images);
           var thumb = p.thumb || images[0] || '';
+          if (p.v) VER_BY_REL[rel] = p.v;
           if (!thumb) return;
           bucket.push({
             folderName: p.folder,
             rel: rel,
             cardName: p.name || (p.folder.indexOf('-') >= 0 ? p.folder.split('-').slice(1).join('-') : p.folder),
-            coverImg: rawBase + '/' + encRel(rel) + '/' + encodeURIComponent(thumb) + '?t=' + CACHE_STAMP,
+            coverImg: verUrl(rel, thumb),
             images: images,
             infoUrl: p.info ? rawBase + '/' + encRel(rel) + '/' + encodeURIComponent(p.info) : '',
             infoType: p.info && /\.md$/i.test(p.info) ? 'md' : 'txt',
@@ -1101,9 +1122,7 @@
               finalThumb = images[0]; 
             }
               
-            const coverImg = finalThumb 
-              ? `${rawBase}/${encRel(rel)}/${encodeURIComponent(finalThumb)}?t=${CACHE_STAMP}` 
-              : '';
+            const coverImg = finalThumb ? verUrl(rel, finalThumb) : '';
               
             const cardName = folderName.includes('-')
               ? folderName.split('-').slice(1).join('-')
@@ -1208,7 +1227,7 @@
 
         // 绑定鼠标悬停或触碰预加载（意图预判：此时用户极可能马上点击）
         const prefetchIntent = () => {
-          preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(allImages[0])}?t=${CACHE_STAMP}`);
+          preloadImage(verUrl(rel, allImages[0]));
         };
         card.addEventListener('mouseenter', prefetchIntent, {once: true});
         card.addEventListener('touchstart', prefetchIntent, {once: true, passive: true});
@@ -1234,7 +1253,7 @@
       // 按图定框：尺寸表命中→开页即按原图比例占位；未命中→4:3 退化，加载后自校正
       const frame = (f, lazy) => {
         const d = IMG_DIMS[rel + '/' + f] || [4, 3];
-        return `<div class="dframe" style="aspect-ratio:${d[0]}/${d[1]}"><img src="${rawBase}/${encRel(rel)}/${encodeURIComponent(f)}?t=${CACHE_STAMP}"${lazy ? ' loading="lazy"' : ''} decoding="async" onclick="openLightbox(this.src)" alt="${escapeHtml(fallbackName)}"></div>`;
+        return `<div class="dframe" style="aspect-ratio:${d[0]}/${d[1]}"><img src="${verUrl(rel, f)}"${lazy ? ' loading="lazy"' : ''} decoding="async" onclick="openLightbox(this.src)" alt="${escapeHtml(fallbackName)}"></div>`;
       };
 
       // 第一步：立即渲染骨架——图片马上开始加载，不等信息文本（txt 网络挂起时不挡图）
@@ -1263,7 +1282,7 @@
       // 后台静默预拉剩余图片（看完文字下滑时秒渲染）
       setTimeout(() => {
         for (let i = 1; i < images.length; i++) {
-          preloadImage(`${rawBase}/${encRel(rel)}/${encodeURIComponent(images[i])}?t=${CACHE_STAMP}`);
+          preloadImage(verUrl(rel, images[i]));
         }
       }, 400);
 
@@ -1336,7 +1355,7 @@
       if (isSold) {
         const heroBox = document.getElementById('d-hero');
         if (heroBox) heroBox.insertAdjacentHTML('beforeend',
-          `<img src="${stampCDNUrl}?t=${CACHE_STAMP}" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">`);
+          `<img src="${stampCDNUrl}?v=stamp1" onerror="this.onerror=null; this.src='products/yinzhang.png';" class="sold-stamp-hero" alt="已售出">`);
       }
       const textEl = document.getElementById('d-text');
       if (textEl) {
