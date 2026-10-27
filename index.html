@@ -34,6 +34,15 @@
        宽出一截（窑门文字被裁的根因），border-box 让宽度含内边距，符合直觉 */
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* 手机端点按不要出现系统那块半透明蓝（手指滚动时擦过卡片也会闪一下）。
+       该属性可继承，写在 html 上即可覆盖全站；下面再点名一次，
+       防止某些浏览器对动态绑定点击的元素不继承。 */
+    html, body { -webkit-tap-highlight-color: transparent; }
+    a, button, img, [onclick],
+    .door, .product-card, .pic, .pic-ph, .cat-bar, .cat-back, .gbtn, .close-btn, .lightbox {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body, html {
       margin: 0; padding: 0;
       background-color: #0a0908;
@@ -169,7 +178,10 @@
     }
     
     .product-card { cursor: pointer; transition: transform 0.4s ease, box-shadow 0.4s ease; background: var(--card-bg); padding: 8px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-    .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
+    /* 上浮效果只在真正有鼠标的设备上生效：手机端点一下会一直"卡"在悬停态（卡片浮着不落回） */
+    @media (hover: hover) and (pointer: fine) {
+      .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
+    }
     .product-card img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 2px; display: block; }
 
     /* 1:1 占位框：进列表的瞬间所有产品都有等大方框 + 品名，缩略图到货后淡出揭图（全程零跳版） */
@@ -202,7 +214,7 @@
       --g-mt:-64px; --g-mx:12px; --g-top:12px;
       --g-h:60px;
       /* 吸顶细长条：品名在收缩态隐去，只留价格+微信；
-         弧心重合公式：「上下/右内边距 + 1px边 + 按钮半径 = 玻璃半径(=高/2)」桌面 7+1+13=21 ✓ */
+         弧心重合公式：「上下/右内边距 + 按钮半径 = 玻璃半径(=高/2)」桌面 7+14=21 ✓（玻璃无边框，见 .glass 注释） */
       --g-hm:42px; --g-mini-w:210px;
       --g-mpv:7px; --g-mpl:16px; --g-mgap:10px;
       --g-mprice:15px; --g-mbtn:11px; --g-mbtn-pad:0 12px; --g-msold:9px;
@@ -243,21 +255,43 @@
        .gslot 卡槽：sticky 吸顶 + 布局锚点（高度恒为整卡高，收缩时正文零跳版）
        .glass 卡片：绝对定位于槽内；初始满宽、骑首图内下缘；吸顶后收缩为右上角细长条 */
     .gslot { position: sticky; top: var(--g-top); z-index: 5; margin: var(--g-mt) var(--g-mx) 0; height: var(--g-h); pointer-events: none; }
+    /* 磨砂玻璃的四条硬规矩（改样式时别破）：
+       ① backdrop-filter（背景模糊）必须交给 ::before 那一层，并让它往外扩 3px。
+          原因：模糊区的边缘天生和"没模糊的真实背景"对不齐，会在卡片最外圈留出
+          1px 的暗环——就是之前那条"极细黑边"。外扩之后接缝落在卡片外，
+          被父层的 overflow:hidden 裁掉，边缘就干净了（已用像素扫描验证）。
+       ② 不要写 border。有边框时模糊只铺到内边距盒，边框那一圈同样会成暗线。
+          描边改用 ::after 的 inset 光环（画在同一层上，没有缝）。
+       ③ 不要写 inset 0 -1px 0 rgba(0,0,0,…)。那是压在卡片内下缘的深色线，
+          在吸顶的小胶囊（圆角 999px）上会贴着下弧跑，也像"黑边"。
+       ④ 底色只用 40%~55% 的透明度：再高就成了实心黑卡（看不见后面的器物），
+          再低文字会糊在亮图上。 */
     .glass { position: absolute; top: 0; right: 0; width: 100%; height: var(--g-h); pointer-events: auto;
       display: flex; align-items: center; gap: var(--g-gap); padding: var(--g-pad);
-      background: linear-gradient(180deg, rgba(32,26,18,.66), rgba(15,11,7,.80));
-      backdrop-filter: blur(22px) saturate(1.35); -webkit-backdrop-filter: blur(22px) saturate(1.35);
-      border: 1px solid rgba(255,238,214,.16); border-radius: 16px; white-space: nowrap; overflow: hidden;
-      box-shadow: inset 0 1px 0 rgba(255,240,220,.20), inset 0 -1px 0 rgba(0,0,0,.32),
-        0 10px 30px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.28);
+      border-radius: 16px; white-space: nowrap; overflow: hidden;
+      /* 外投影必须留在这一层：写进 ::after 会被 overflow:hidden 一起裁掉 */
+      box-shadow: 0 14px 34px rgba(0,0,0,.34);
       transition: width .5s cubic-bezier(.22,1,.36,1), height .4s cubic-bezier(.22,1,.36,1),
         padding .4s cubic-bezier(.22,1,.36,1), border-radius .4s cubic-bezier(.22,1,.36,1),
         gap .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease; }
+    /* 磨砂层（见注释①）：外扩 3px，border-radius 跟随父层 */
+    .glass::before { content: ''; position: absolute; inset: -3px; border-radius: inherit;
+      background: linear-gradient(180deg, rgba(24,19,13,.40), rgba(10,8,5,.52));
+      backdrop-filter: blur(26px) saturate(1.55); -webkit-backdrop-filter: blur(26px) saturate(1.55); }
+    /* 描边光环（见注释②） */
+    .glass::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(255,240,220,.16), inset 0 1px 0 rgba(255,244,226,.14);
+      transition: box-shadow .4s ease; }
+    /* 文字/按钮必须压在磨砂层之上（::before 是定位元素，默认会盖住普通文字） */
+    .glass > * { position: relative; z-index: 1; }
     /* 吸顶态：收缩为右上角细长条（右对齐，宽度过渡即"缩小"动画） */
     .glass.pinned { width: var(--g-mini-w); height: var(--g-hm); padding: var(--g-mpv) var(--g-mpv) var(--g-mpv) var(--g-mpl); gap: var(--g-mgap); border-radius: 999px;
-      box-shadow: inset 0 1px 0 rgba(255,240,220,.16), inset 0 -1px 0 rgba(0,0,0,.30),
-        0 8px 22px rgba(0,0,0,.50), 0 2px 6px rgba(0,0,0,.30); }
-    .glass h1 { font-family: var(--serif); font-size: var(--g-name); font-weight: 600; letter-spacing: .04em; color: var(--text-main); flex: 0 1 auto; min-width: 0; }
+      /* 小胶囊面积小、又压在图片上，透明度略收一点保可读 */
+      box-shadow: 0 10px 26px rgba(0,0,0,.40); }
+    .glass.pinned::before { background: linear-gradient(180deg, rgba(22,17,12,.50), rgba(10,8,5,.62)); }
+    .glass.pinned::after { box-shadow: inset 0 0 0 1px rgba(255,240,220,.15), inset 0 1px 0 rgba(255,244,226,.13); }
+    /* 品名一行、不换行；太长就省略号收尾（以前会溢出到微信按钮下面，字压字） */
+    .glass h1 { font-family: var(--serif); font-size: var(--g-name); font-weight: 600; letter-spacing: .04em; color: var(--text-main); flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     /* 收缩态隐去品名：常驻条只留价格 + 微信（身份由页面本身承载） */
     .glass.pinned h1 { display: none; }
     .glass .sold-tag { flex: 0 0 auto; font-family: var(--serif); font-size: var(--g-sold); color: #c99a63; border: 1px solid rgba(201,160,106,.45); background: rgba(201,160,106,.10); padding: 2px 7px; border-radius: 4px; letter-spacing: .12em; }
@@ -279,11 +313,13 @@
     .gbtn.sold:hover { background: #3a2f20; color: var(--text-main); }
     .gbtn.sold .hint { color: rgba(201,160,106,.45); }
     /* 细长条态：按钮收紧为胶囊，且与玻璃条外弧严格同心
-       —— 高度 = 玻璃高 - 2×(1px边+内边距) = 2×按钮半径（正胶囊）；
-          半径 = 玻璃半径(高/2) - 1px边 - 内边距（弧心重合，弧间距恒定=内边距，直边与弧角等宽） */
+       —— 玻璃已无 border（见 .glass 注释①），弧心重合公式跟着少掉 1px：
+          高度 = 玻璃高 - 2×内边距 = 2×按钮半径（正胶囊）；
+          半径 = 玻璃半径(高/2) - 内边距（弧心重合，弧间距恒定=内边距）
+          桌面 42/2-7=14 vs 高(42-14)/2=14 ✓ */
     .glass.pinned .gbtn { padding: var(--g-mbtn-pad); font-size: var(--g-mbtn);
-      height: calc(var(--g-hm) - 2px - 2 * var(--g-mpv));
-      border-radius: calc(var(--g-hm) / 2 - 1px - var(--g-mpv)); }
+      height: calc(var(--g-hm) - 2 * var(--g-mpv));
+      border-radius: calc(var(--g-hm) / 2 - var(--g-mpv)); }
     .glass.pinned .gbtn .hint { display: none; }
     /* 细长条态隐藏已售徽标（按钮文字已含"已售出"，避免重复）——只针对徽章，不碰 .gbtn.sold */
     .glass.pinned .sold-tag { display: none; }
